@@ -48,9 +48,16 @@ dotnet_naming_style.underscore_prefix_style.capitalization = camel_case
 dotnet_diagnostic.CA1848.severity = none   # LoggerMessage delegates - opt in later
 dotnet_diagnostic.CA2007.severity = none   # ConfigureAwait not needed in ASP.NET Core
 dotnet_diagnostic.CA1716.severity = none   # VB-reserved-word clash; solution is C#-only
+dotnet_diagnostic.CA1711.severity = none   # domain types legitimately end in 'Permission'
+dotnet_diagnostic.CA1720.severity = none   # enum members (String/Integer) mirror the domain vocabulary
 
 [*.{json,csproj,props,targets,xml,config}]
 indent_size = 2
 
 [*.{js,ts,css,scss,html,cshtml}]
 indent_size = 2
+
+# EF Core migrations are tool-generated; don't hold them to style/analyzer rules.
+[**/Migrations/*.cs]
+generated_code = true
+dotnet_analyzer_diagnostic.severity = none

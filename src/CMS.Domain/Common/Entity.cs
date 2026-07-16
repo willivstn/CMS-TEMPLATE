@@ -5,13 +5,13 @@ namespace CMS.Domain.Common;
 /// buffering and value-style equality based on identity.
 /// </summary>
 /// <typeparam name="TKey">The primary-key type.</typeparam>
-public abstract class Entity<TKey> : IEntity<TKey>, IEquatable<Entity<TKey>>
+public abstract class Entity<TKey> : IEntity<TKey>, IHasDomainEvents, IEquatable<Entity<TKey>>
     where TKey : notnull
 {
     private readonly List<IDomainEvent> _domainEvents = [];
 
     /// <summary>The primary key.</summary>
-    public TKey Id { get; protected set; } = default!;
+    public TKey Id { get; set; } = default!;
 
     /// <summary>Domain events raised by this entity, awaiting dispatch after commit.</summary>
     public IReadOnlyCollection<IDomainEvent> DomainEvents => _domainEvents.AsReadOnly();

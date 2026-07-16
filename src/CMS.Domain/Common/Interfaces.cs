@@ -12,6 +12,19 @@ public interface IEntity<out TKey> : IEntity
 }
 
 /// <summary>
+/// An entity that buffers domain events for post-commit dispatch. Lets the
+/// persistence layer discover and publish events without knowing concrete types.
+/// </summary>
+public interface IHasDomainEvents
+{
+    /// <summary>Events raised by this entity awaiting dispatch.</summary>
+    IReadOnlyCollection<IDomainEvent> DomainEvents { get; }
+
+    /// <summary>Clears buffered events after they have been dispatched.</summary>
+    void ClearDomainEvents();
+}
+
+/// <summary>
 /// Records who created and last modified an entity and when. Populated
 /// automatically by the auditing <c>SaveChanges</c> interceptor.
 /// </summary>

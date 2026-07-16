@@ -1,21 +1,56 @@
+using CMS.Application.Common.Abstractions;
+using CMS.Infrastructure.Identity;
+using CMS.Infrastructure.Multitenancy;
+using CMS.Infrastructure.Persistence;
+using CMS.Infrastructure.Persistence.Interceptors;
+using CMS.Infrastructure.Services;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace CMS.Infrastructure;
 
 /// <summary>
-/// Registers the Infrastructure layer: EF Core DbContext, Identity, caching,
-/// email, file storage, background jobs and other external-facing services.
-/// Concrete implementations here are bound to Application-layer interfaces so
-/// the rest of the system depends only on abstractions.
+/// Registers the Infrastructure layer: EF Core persistence with audit/soft-delete
+/// and domain-event interceptors, multi-tenancy, and the ambient services the
+/// Application layer depends on. Identity, email, storage, caching and jobs are
+/// layered on in their respective phases.
 /// </summary>
 public static class DependencyInjection
 {
     public static IServiceCollection AddInfrastructure(this IServiceCollection services, IConfiguration configuration)
     {
-        // Persistence, Identity, caching, email, storage and jobs are registered
-        // here as their respective phases land. Kept as a single entry point so
-        // the Web composition root has one call: services.AddInfrastructure(config).
+        services.Configure<MultiTenancyOptions>(configuration.GetSection(MultiTenancyOptions.SectionName));
+
+        // Ambient services. The Web layer overrides ICurrentUser/ITenantContext with
+        // HttpContext-backed implementations; these are the non-request defaults.
+        services.AddSingleton<IDateTimeProvider, DateTimeProvider>();
+        services.AddScoped<ITenantContext, DefaultTenantContext>();
+        services.AddScoped<ICurrentUser, SystemCurrentUser>();
+
+        // SaveChanges interceptors (registered so they can be resolved with their deps).
+        services.AddScoped<AuditSaveChangesInterceptor>();
+        services.AddScoped<DispatchDomainEventsInterceptor>();
+
+        var connectionString = configuration.GetConnectionString("DefaultConnection")
+            ?? throw new InvalidOperationException("Connection string 'DefaultConnection' was not found.");
+
+        services.AddDbContext<AppDbContext>((sp, options) =>
+        {
+            options.UseSqlServer(connectionString, sql =>
+            {
+                sql.MigrationsAssembly(typeof(AppDbContext).Assembly.FullName);
+                sql.EnableRetryOnFailure();
+            });
+
+            options.AddInterceptors(
+                sp.GetRequiredService<AuditSaveChangesInterceptor>(),
+                sp.GetRequiredService<DispatchDomainEventsInterceptor>());
+        });
+
+        services.AddScoped<IApplicationDbContext>(sp => sp.GetRequiredService<AppDbContext>());
+        services.AddScoped<DatabaseInitializer>();
+
         return services;
     }
 }

@@ -1,5 +1,6 @@
 using CMS.Application;
 using CMS.Infrastructure;
+using CMS.Infrastructure.Persistence;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -12,6 +13,14 @@ builder.Services.AddApplication();
 builder.Services.AddInfrastructure(builder.Configuration);
 
 var app = builder.Build();
+
+// Apply migrations and seed on startup. Convenient for a starter template; gate
+// behind configuration or a CLI step for production deployments if preferred.
+using (var scope = app.Services.CreateScope())
+{
+    var initializer = scope.ServiceProvider.GetRequiredService<DatabaseInitializer>();
+    await initializer.InitializeAsync();
+}
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
