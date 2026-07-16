@@ -1,6 +1,7 @@
 using CMS.Application;
 using CMS.Infrastructure;
 using CMS.Infrastructure.Persistence;
+using CMS.Web;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -11,6 +12,7 @@ builder.Services.AddControllersWithViews();
 // so the composition root stays a thin, readable list of capabilities.
 builder.Services.AddApplication();
 builder.Services.AddInfrastructure(builder.Configuration);
+builder.Services.AddWebServices();
 
 var app = builder.Build();
 
@@ -33,6 +35,7 @@ if (!app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 app.UseRouting();
 
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapStaticAssets();

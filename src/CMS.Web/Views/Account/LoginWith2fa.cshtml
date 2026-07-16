@@ -1,0 +1,30 @@
+@model CMS.Web.Models.Account.LoginWith2faViewModel
+@{ ViewData["Title"] = "Two-factor authentication"; }
+
+<div class="row justify-content-center">
+  <div class="col-md-5 col-lg-4">
+    <div class="card shadow-sm mt-5">
+      <div class="card-body p-4">
+        <h1 class="h4 mb-3">Two-factor authentication</h1>
+        <p class="text-muted small">Enter the code from your authenticator app.</p>
+        <form asp-action="LoginWith2fa" method="post">
+          <input type="hidden" asp-for="RememberMe" />
+          <input type="hidden" asp-for="ReturnUrl" />
+          <div asp-validation-summary="ModelOnly" class="text-danger small mb-2"></div>
+          <div class="mb-3">
+            <label asp-for="TwoFactorCode" class="form-label"></label>
+            <input asp-for="TwoFactorCode" class="form-control" autocomplete="one-time-code" inputmode="numeric" />
+            <span asp-validation-for="TwoFactorCode" class="text-danger small"></span>
+          </div>
+          <div class="form-check mb-3">
+            <input asp-for="RememberMachine" class="form-check-input" />
+            <label asp-for="RememberMachine" class="form-check-label"></label>
+          </div>
+          <button type="submit" class="btn btn-primary w-100">Verify</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+@section Scripts { <partial name="_ValidationScriptsPartial" /> }

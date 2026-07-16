@@ -1,4 +1,5 @@
 using CMS.Application.Common.Abstractions;
+using CMS.Infrastructure.Email;
 using CMS.Infrastructure.Identity;
 using CMS.Infrastructure.Multitenancy;
 using CMS.Infrastructure.Persistence;
@@ -50,6 +51,10 @@ public static class DependencyInjection
 
         services.AddScoped<IApplicationDbContext>(sp => sp.GetRequiredService<AppDbContext>());
         services.AddScoped<DatabaseInitializer>();
+
+        // Authorization + messaging services (Identity itself is configured by the Web layer).
+        services.AddScoped<IPermissionService, PermissionService>();
+        services.AddScoped<IEmailSender, LoggingEmailSender>();
 
         return services;
     }
