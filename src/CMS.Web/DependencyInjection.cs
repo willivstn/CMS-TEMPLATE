@@ -22,10 +22,14 @@ public static class DependencyInjection
     public static IServiceCollection AddWebServices(this IServiceCollection services)
     {
         services.AddHttpContextAccessor();
+        services.AddMemoryCache();
 
         // HttpContext-backed current user overrides the Infrastructure system default.
         services.AddScoped<ICurrentUser, CurrentUser>();
         services.AddScoped<IAppAuthenticationService, AuthenticationService>();
+
+        // Database-driven, permission-filtered navigation.
+        services.AddScoped<CMS.Web.Navigation.INavigationService, CMS.Web.Navigation.NavigationService>();
 
         services.AddIdentity<ApplicationUser, ApplicationRole>(options =>
             {

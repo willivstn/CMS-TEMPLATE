@@ -1,0 +1,8 @@
+@model IReadOnlyList<CMS.Web.Navigation.MenuNodeViewModel>
+
+<ul class="nav flex-column cms-sidebar-nav">
+    @foreach (var node in Model)
+    {
+        <partial name="_MenuNode" model="node" />
+    }
+</ul>

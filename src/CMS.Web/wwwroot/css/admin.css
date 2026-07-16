@@ -1,0 +1,205 @@
+/* ===========================================================================
+   CMS Admin shell. Built on Bootstrap 5.3 CSS variables so light/dark themes
+   (via data-bs-theme) are handled automatically. Vanilla CSS, no preprocessor.
+   =========================================================================== */
+
+:root {
+    --cms-sidebar-width: 264px;
+    --cms-topbar-height: 60px;
+    --cms-sidebar-bg: var(--bs-body-bg);
+    --cms-transition: .2s ease;
+}
+
+[data-bs-theme="dark"] {
+    --cms-sidebar-bg: #1a1d21;
+}
+
+body {
+    background-color: var(--bs-tertiary-bg);
+}
+
+/* ---- Layout skeleton ---- */
+.cms-app {
+    min-height: 100vh;
+}
+
+.cms-sidebar {
+    position: fixed;
+    inset: 0 auto 0 0;
+    width: var(--cms-sidebar-width);
+    background: var(--cms-sidebar-bg);
+    border-right: 1px solid var(--bs-border-color);
+    display: flex;
+    flex-direction: column;
+    z-index: 1040;
+    transition: transform var(--cms-transition);
+    overflow-y: auto;
+}
+
+.cms-main {
+    margin-left: var(--cms-sidebar-width);
+    min-height: 100vh;
+    transition: margin-left var(--cms-transition);
+    display: flex;
+    flex-direction: column;
+}
+
+/* Collapsed (desktop) */
+.cms-app.sidebar-collapsed .cms-sidebar {
+    transform: translateX(-100%);
+}
+
+.cms-app.sidebar-collapsed .cms-main {
+    margin-left: 0;
+}
+
+/* ---- Sidebar brand ---- */
+.cms-sidebar-brand {
+    height: var(--cms-topbar-height);
+    display: flex;
+    align-items: center;
+    padding: 0 1.25rem;
+    border-bottom: 1px solid var(--bs-border-color);
+    flex-shrink: 0;
+}
+
+.cms-sidebar-brand a {
+    text-decoration: none;
+    color: var(--bs-body-color);
+}
+
+/* ---- Sidebar menu ---- */
+.cms-sidebar-menu {
+    padding: .75rem;
+}
+
+.cms-sidebar-nav .nav-link {
+    color: var(--bs-secondary-color);
+    border-radius: .5rem;
+    padding: .55rem .75rem;
+    gap: .7rem;
+    font-size: .925rem;
+    transition: background-color var(--cms-transition), color var(--cms-transition);
+}
+
+.cms-sidebar-nav .nav-link .bi:first-child {
+    width: 1.1rem;
+    text-align: center;
+}
+
+.cms-sidebar-nav .nav-link:hover {
+    background-color: var(--bs-secondary-bg);
+    color: var(--bs-body-color);
+}
+
+.cms-sidebar-nav .nav-link.active {
+    background-color: var(--bs-primary-bg-subtle);
+    color: var(--bs-primary-text-emphasis);
+    font-weight: 500;
+}
+
+.cms-sidebar-nav .nav-link.disabled {
+    opacity: .5;
+    pointer-events: none;
+}
+
+.cms-nav-caret {
+    transition: transform var(--cms-transition);
+    font-size: .75rem;
+}
+
+.cms-nav-group[aria-expanded="true"] .cms-nav-caret {
+    transform: rotate(180deg);
+}
+
+.cms-sidebar-subnav {
+    margin-left: 1.4rem;
+    border-left: 1px solid var(--bs-border-color);
+    padding-left: .35rem;
+}
+
+.cms-sidebar-subnav .nav-link {
+    font-size: .875rem;
+    padding: .4rem .75rem;
+}
+
+/* ---- Topbar ---- */
+.cms-topbar {
+    height: var(--cms-topbar-height);
+    position: sticky;
+    top: 0;
+    z-index: 1030;
+    display: flex;
+    align-items: center;
+    gap: .75rem;
+    padding: 0 1rem;
+    background: var(--bs-body-bg);
+    border-bottom: 1px solid var(--bs-border-color);
+}
+
+.btn-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.25rem;
+    height: 2.25rem;
+    border-radius: .5rem;
+    color: var(--bs-secondary-color);
+    border: 1px solid transparent;
+}
+
+.btn-icon:hover {
+    background-color: var(--bs-secondary-bg);
+    color: var(--bs-body-color);
+}
+
+.cms-avatar {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2rem;
+    height: 2rem;
+    border-radius: 50%;
+    background: var(--bs-primary);
+    color: #fff;
+    font-size: .8rem;
+    font-weight: 600;
+}
+
+/* ---- Content ---- */
+.cms-content {
+    padding: 1.5rem;
+    flex: 1;
+}
+
+/* ---- Theme toggle icons ---- */
+.cms-theme-icon-light { display: none; }
+[data-bs-theme="dark"] .cms-theme-icon-dark { display: none; }
+[data-bs-theme="dark"] .cms-theme-icon-light { display: inline; }
+
+/* ---- Stat cards ---- */
+.cms-stat-card .cms-stat-icon {
+    width: 3rem;
+    height: 3rem;
+    border-radius: .75rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.35rem;
+}
+
+/* ---- Mobile ---- */
+.cms-sidebar-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,.5);
+    z-index: 1035;
+    display: none;
+}
+
+@media (max-width: 991.98px) {
+    .cms-sidebar { transform: translateX(-100%); }
+    .cms-main { margin-left: 0; }
+    .cms-app.sidebar-open .cms-sidebar { transform: translateX(0); }
+    .cms-app.sidebar-open .cms-sidebar-backdrop { display: block; }
+}

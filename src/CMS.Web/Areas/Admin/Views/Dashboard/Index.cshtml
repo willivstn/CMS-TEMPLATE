@@ -1,0 +1,99 @@
+@model CMS.Web.Areas.Admin.Models.DashboardViewModel
+@using CMS.Web.Models.Components
+@{
+    ViewData["Title"] = "Dashboard";
+}
+
+<div class="d-flex align-items-center justify-content-between mb-4">
+    <div>
+        <h1 class="h3 mb-1">Dashboard</h1>
+        <p class="text-secondary mb-0">Welcome back. Here's what's happening.</p>
+    </div>
+    <button class="btn btn-primary btn-sm" type="button" onclick="cmsToast('This is a demo toast', 'success')">
+        <i class="bi bi-bell me-1"></i> Test toast
+    </button>
+</div>
+
+<div class="row g-3 mb-4">
+    <div class="col-6 col-xl-3">
+        <partial name="_StatCard" model="@(new StatCard("Users", Model.UserCount.ToString(), "bi-people", "primary", Url.Action("Index", "Users")))" />
+    </div>
+    <div class="col-6 col-xl-3">
+        <partial name="_StatCard" model="@(new StatCard("Roles", Model.RoleCount.ToString(), "bi-person-badge", "info", Url.Action("Index", "Roles")))" />
+    </div>
+    <div class="col-6 col-xl-3">
+        <partial name="_StatCard" model="@(new StatCard("Content items", Model.ContentCount.ToString(), "bi-file-earmark-text", "success", Url.Action("Pages", "Content")))" />
+    </div>
+    <div class="col-6 col-xl-3">
+        <partial name="_StatCard" model="@(new StatCard("Media files", Model.MediaCount.ToString(), "bi-images", "warning", Url.Action("Index", "Media")))" />
+    </div>
+</div>
+
+<div class="row g-3">
+    <div class="col-lg-7">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-header bg-transparent border-0 pt-3">
+                <h2 class="h6 mb-0"><i class="bi bi-clock-history me-2"></i>Recent activity</h2>
+            </div>
+            <div class="card-body pt-2">
+                @if (Model.RecentActivity.Count == 0)
+                {
+                    <p class="text-secondary small mb-0">No activity yet.</p>
+                }
+                else
+                {
+                    <div class="table-responsive">
+                        <table class="table table-sm align-middle mb-0">
+                            <thead>
+                                <tr class="text-secondary small">
+                                    <th>Action</th><th>Entity</th><th>User</th><th class="text-end">When</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var row in Model.RecentActivity)
+                                {
+                                    <tr>
+                                        <td><span class="badge text-bg-light border">@row.Action</span></td>
+                                        <td class="small">@row.Entity</td>
+                                        <td class="small">@row.User</td>
+                                        <td class="text-end small text-secondary">@row.When.LocalDateTime.ToString("g")</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-5">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-header bg-transparent border-0 pt-3">
+                <h2 class="h6 mb-0"><i class="bi bi-person-plus me-2"></i>Recent users</h2>
+            </div>
+            <div class="card-body pt-2">
+                @if (Model.RecentUsers.Count == 0)
+                {
+                    <p class="text-secondary small mb-0">No users yet.</p>
+                }
+                else
+                {
+                    <ul class="list-unstyled mb-0">
+                        @foreach (var user in Model.RecentUsers)
+                        {
+                            <li class="d-flex align-items-center gap-2 py-2 border-bottom">
+                                <span class="cms-avatar">@(string.IsNullOrEmpty(user.Name) ? "?" : char.ToUpperInvariant(user.Name[0]))</span>
+                                <div class="flex-grow-1">
+                                    <div class="small fw-medium">@user.Name</div>
+                                    <div class="text-secondary" style="font-size:.75rem">@user.Email</div>
+                                </div>
+                                <span class="text-secondary" style="font-size:.72rem">@user.When.LocalDateTime.ToString("d")</span>
+                            </li>
+                        }
+                    </ul>
+                }
+            </div>
+        </div>
+    </div>
+</div>

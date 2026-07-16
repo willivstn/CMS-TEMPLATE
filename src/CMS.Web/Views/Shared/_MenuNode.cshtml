@@ -1,0 +1,40 @@
+@model CMS.Web.Navigation.MenuNodeViewModel
+@{
+    var collapseId = "menu-" + Guid.NewGuid().ToString("N");
+    var iconClass = string.IsNullOrEmpty(Model.Icon) ? "bi-dot" : Model.Icon;
+}
+
+<li class="nav-item">
+    @if (Model.HasChildren)
+    {
+        <a class="nav-link cms-nav-group d-flex align-items-center @(Model.IsActive ? "active" : null)"
+           data-bs-toggle="collapse" href="#@collapseId" role="button"
+           aria-expanded="@(Model.IsActive ? "true" : "false")">
+            <i class="bi @iconClass"></i>
+            <span class="cms-nav-text">@Model.Title</span>
+            <i class="bi bi-chevron-down ms-auto cms-nav-caret"></i>
+        </a>
+        <div class="collapse @(Model.IsActive ? "show" : null)" id="@collapseId">
+            <ul class="nav flex-column cms-sidebar-subnav">
+                @foreach (var child in Model.Children)
+                {
+                    <partial name="_MenuNode" model="child" />
+                }
+            </ul>
+        </div>
+    }
+    else
+    {
+        <a class="nav-link d-flex align-items-center @(Model.IsActive ? "active" : null) @(Model.IsEnabled ? null : "disabled")"
+           href="@(Model.Url ?? "#")"
+           target="@(Model.OpenInNewTab ? "_blank" : null)"
+           rel="@(Model.IsExternal ? "noopener noreferrer" : null)">
+            <i class="bi @iconClass"></i>
+            <span class="cms-nav-text">@Model.Title</span>
+            @if (Model.IsExternal)
+            {
+                <i class="bi bi-box-arrow-up-right ms-auto small"></i>
+            }
+        </a>
+    }
+</li>
