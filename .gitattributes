@@ -1,0 +1,23 @@
+# Normalize line endings; treat these as text with auto EOL conversion.
+* text=auto
+
+*.cs      text diff=csharp
+*.csproj  text
+*.props   text
+*.targets text
+*.json    text
+*.md      text
+*.cshtml  text
+*.css     text
+*.js      text
+
+# Binary assets - never convert.
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.woff binary
+*.woff2 binary
+*.pdf binary
+*.dll binary

@@ -1,0 +1,55 @@
+## .NET / Visual Studio
+bin/
+obj/
+out/
+[Dd]ebug/
+[Rr]elease/
+x64/
+x86/
+[Aa][Rr][Mm]/
+[Aa][Rr][Mm]64/
+.vs/
+*.user
+*.suo
+*.userprefs
+*_i.c
+*_p.c
+*.rsp
+
+## Build / publish
+[Pp]ublish/
+*.publishsettings
+PublishScripts/
+artifacts/
+TestResults/
+coverage/
+*.coverage
+*.trx
+
+## Rider / VS Code
+.idea/
+.vscode/
+!.vscode/extensions.json
+
+## Node (for front-end asset builds)
+node_modules/
+npm-debug.log*
+package-lock.json.bak
+
+## Secrets & local config
+appsettings.*.local.json
+*.local.json
+secrets.json
+.env
+.env.*
+
+## Logs & databases
+logs/
+*.log
+*.mdf
+*.ldf
+*.ndf
+
+## OS
+Thumbs.db
+.DS_Store
