@@ -44,6 +44,12 @@ public static class DependencyInjection
                 sql.EnableRetryOnFailure();
             });
 
+            // Benign here: soft-deletable principals (e.g. ApplicationUser) with
+            // non-filtered dependents. We never rely on filtered principals being
+            // present for these navigations.
+            options.ConfigureWarnings(w => w.Ignore(
+                Microsoft.EntityFrameworkCore.Diagnostics.CoreEventId.PossibleIncorrectRequiredNavigationWithQueryFilterInteractionWarning));
+
             options.AddInterceptors(
                 sp.GetRequiredService<AuditSaveChangesInterceptor>(),
                 sp.GetRequiredService<DispatchDomainEventsInterceptor>());
@@ -55,6 +61,12 @@ public static class DependencyInjection
         // Authorization + messaging services (Identity itself is configured by the Web layer).
         services.AddScoped<IPermissionService, PermissionService>();
         services.AddScoped<IEmailSender, LoggingEmailSender>();
+
+        // Platform services: caching, settings, feature flags.
+        services.AddMemoryCache();
+        services.AddSingleton<ICacheService, Caching.MemoryCacheService>();
+        services.AddScoped<ISettingService, Configuration.SettingService>();
+        services.AddScoped<IFeatureService, Configuration.FeatureService>();
 
         return services;
     }

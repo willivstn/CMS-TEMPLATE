@@ -1,0 +1,35 @@
+@model IReadOnlyList<EmailTemplateListDto>
+@{ ViewData["Title"] = "Email Templates"; }
+
+<div class="d-flex align-items-center justify-content-between mb-3">
+    <h1 class="h3 mb-0">Email Templates</h1>
+    <a asp-action="Create" class="btn btn-primary btn-sm"><i class="bi bi-plus-lg me-1"></i>New template</a>
+</div>
+
+<div class="card border-0 shadow-sm">
+    <div class="card-body">
+        <table class="table table-hover align-middle mb-0">
+            <thead><tr class="text-secondary small"><th>Key</th><th>Subject</th><th>Active</th><th class="text-end">Actions</th></tr></thead>
+            <tbody>
+            @foreach (var t in Model)
+            {
+                <tr>
+                    <td class="fw-medium">@t.Key</td>
+                    <td class="small">@t.Subject</td>
+                    <td>@(t.IsActive ? "Yes" : "No")</td>
+                    <td class="text-end">
+                        <a asp-action="Edit" asp-route-id="@t.Id" class="btn btn-sm btn-outline-secondary">Edit</a>
+                        <form asp-action="Delete" asp-route-id="@t.Id" method="post" class="d-inline">
+                            <button class="btn btn-sm btn-outline-danger" data-cms-confirm="Delete template '@t.Key'?">Delete</button>
+                        </form>
+                    </td>
+                </tr>
+            }
+            @if (Model.Count == 0)
+            {
+                <tr><td colspan="4" class="text-center text-secondary py-4">No email templates yet.</td></tr>
+            }
+            </tbody>
+        </table>
+    </div>
+</div>

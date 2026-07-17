@@ -4,7 +4,13 @@ using CMS.Domain.Entities.Identity;
 using CMS.Infrastructure.Identity;
 using CMS.Infrastructure.Persistence;
 using CMS.Web.Authorization;
+using CMS.Web.Email;
 using CMS.Web.Identity;
+using CMS.Web.Jobs;
+using CMS.Web.Realtime;
+using CMS.Web.Security;
+using Hangfire;
+using Hangfire.SqlServer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using IAppAuthenticationService = CMS.Application.Identity.IAuthenticationService;
@@ -19,15 +25,19 @@ namespace CMS.Web;
 /// </summary>
 public static class DependencyInjection
 {
-    public static IServiceCollection AddWebServices(this IServiceCollection services)
+    public static IServiceCollection AddWebServices(this IServiceCollection services, IConfiguration configuration)
     {
         services.AddHttpContextAccessor();
         services.AddMemoryCache();
+        services.AddSignalR();
+        services.AddAntiforgery(options => options.HeaderName = "X-CSRF-TOKEN");
 
         // HttpContext-backed current user overrides the Infrastructure system default.
         services.AddScoped<ICurrentUser, CurrentUser>();
         services.AddScoped<IAppAuthenticationService, AuthenticationService>();
         services.AddScoped<CMS.Application.Identity.IIdentityService, IdentityService>();
+        services.AddScoped<IEncryptionService, DataProtectionEncryptionService>();
+        services.AddScoped<INotificationService, NotificationService>();
 
         // Database-driven, permission-filtered navigation.
         services.AddScoped<CMS.Web.Navigation.INavigationService, CMS.Web.Navigation.NavigationService>();
@@ -35,6 +45,28 @@ public static class DependencyInjection
         // File storage (local by default) and the upload/thumbnail pipeline.
         services.AddScoped<CMS.Application.Common.Abstractions.IFileStorage, CMS.Web.Storage.LocalFileStorage>();
         services.AddScoped<CMS.Web.Storage.MediaUploadService>();
+
+        // Email: queue writer supersedes the Infrastructure logging sender; SMTP dispatcher drains it.
+        services.Configure<SmtpOptions>(configuration.GetSection(SmtpOptions.SectionName));
+        services.AddScoped<IEmailSender, QueuedEmailSender>();
+        services.AddScoped<SmtpEmailDispatcher>();
+
+        // Background jobs (Hangfire on SQL Server) and the recurring job classes.
+        var connectionString = configuration.GetConnectionString("DefaultConnection");
+        services.AddHangfire(cfg => cfg
+            .SetDataCompatibilityLevel(CompatibilityLevel.Version_180)
+            .UseSimpleAssemblyNameTypeSerializer()
+            .UseRecommendedSerializerSettings()
+            .UseSqlServerStorage(connectionString, new SqlServerStorageOptions
+            {
+                PrepareSchemaIfNecessary = true,
+                QueuePollInterval = TimeSpan.FromSeconds(15),
+            }));
+        services.AddHangfireServer();
+        services.AddScoped<IBackgroundJobService, BackgroundJobService>();
+        services.AddScoped<ScheduledContentPublisher>();
+        services.AddScoped<EmailQueueProcessor>();
+        services.AddScoped<CleanupJob>();
 
         services.AddIdentity<ApplicationUser, ApplicationRole>(options =>
             {

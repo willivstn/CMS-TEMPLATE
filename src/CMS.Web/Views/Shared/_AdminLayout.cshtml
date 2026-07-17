@@ -1,5 +1,7 @@
 @using System.Security.Claims
+@inject Microsoft.AspNetCore.Antiforgery.IAntiforgery Antiforgery
 @{
+    var requestToken = Antiforgery.GetAndStoreTokens(Context).RequestToken;
     var theme = Context.Request.Cookies["cms-theme"] ?? "light";
     var displayName = User.FindFirstValue("display_name") ?? User.Identity?.Name ?? "User";
     var initials = string.Concat(displayName.Split(' ', StringSplitOptions.RemoveEmptyEntries)
@@ -14,6 +16,7 @@
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/lib/bootstrap-icons/bootstrap-icons.min.css" />
     <link rel="stylesheet" href="~/css/admin.css" asp-append-version="true" />
+    <meta name="csrf-token" content="@requestToken" />
 </head>
 <body>
 <div class="cms-app" id="cmsApp">
@@ -38,6 +41,21 @@
                 <vc:breadcrumb></vc:breadcrumb>
             </div>
             <div class="ms-auto d-flex align-items-center gap-2">
+                <div class="dropdown">
+                    <button class="btn btn-sm btn-icon position-relative" id="cmsNotifBell" type="button" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-label="Notifications">
+                        <i class="bi bi-bell fs-5"></i>
+                        <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill text-bg-danger d-none" id="cmsNotifBadge">0</span>
+                    </button>
+                    <div class="dropdown-menu dropdown-menu-end p-0" style="width: 340px;">
+                        <div class="d-flex align-items-center justify-content-between px-3 py-2 border-bottom">
+                            <strong class="small">Notifications</strong>
+                            <button type="button" class="btn btn-link btn-sm p-0 text-decoration-none" id="cmsNotifMarkAll">Mark all read</button>
+                        </div>
+                        <div id="cmsNotifList" style="max-height: 360px; overflow-y: auto;">
+                            <div class="text-center text-secondary small py-4">No notifications</div>
+                        </div>
+                    </div>
+                </div>
                 <button class="btn btn-sm btn-icon" id="cmsThemeToggle" type="button" aria-label="Toggle theme" title="Toggle theme">
                     <i class="bi bi-moon-stars cms-theme-icon-dark"></i>
                     <i class="bi bi-sun cms-theme-icon-light"></i>
@@ -76,9 +94,11 @@
 <div class="toast-container position-fixed bottom-0 end-0 p-3" id="cmsToastContainer"></div>
 
 <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+<script src="~/lib/signalr/signalr.min.js"></script>
 <script src="~/js/theme.js" asp-append-version="true"></script>
 <script src="~/js/admin.js" asp-append-version="true"></script>
 <script src="~/js/validation.js" asp-append-version="true"></script>
+<script src="~/js/notifications.js" asp-append-version="true"></script>
 @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>

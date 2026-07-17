@@ -1,0 +1,46 @@
+@model EmailTemplateFormViewModel
+@{ ViewData["Title"] = "New email template"; }
+
+<div class="d-flex align-items-center justify-content-between mb-3">
+    <h1 class="h3 mb-0">New email template</h1>
+    <a asp-action="Index" class="btn btn-sm btn-outline-secondary">Back to list</a>
+</div>
+
+<div class="card border-0 shadow-sm">
+    <div class="card-body">
+        <form asp-action="Create" method="post">
+            <div asp-validation-summary="ModelOnly" class="text-danger small mb-2"></div>
+            <div class="row g-3">
+                <div class="col-md-4">
+                    <label asp-for="Key" class="form-label"></label>
+                    <input asp-for="Key" class="form-control" placeholder="WelcomeEmail" />
+                    <span asp-validation-for="Key" class="text-danger small"></span>
+                </div>
+                <div class="col-md-8">
+                    <label asp-for="Subject" class="form-label"></label>
+                    <input asp-for="Subject" class="form-control" />
+                    <span asp-validation-for="Subject" class="text-danger small"></span>
+                </div>
+                <div class="col-12">
+                    <label asp-for="HtmlBody" class="form-label"></label>
+                    <textarea asp-for="HtmlBody" class="form-control font-monospace" rows="10"></textarea>
+                    <span asp-validation-for="HtmlBody" class="text-danger small"></span>
+                    <div class="form-text">Use tokens like {{UserName}} — substituted when the email is sent.</div>
+                </div>
+                <div class="col-12">
+                    <label asp-for="Description" class="form-label"></label>
+                    <input asp-for="Description" class="form-control" />
+                </div>
+                <div class="col-12">
+                    <div class="form-check form-switch">
+                        <input asp-for="IsActive" class="form-check-input" role="switch" />
+                        <label asp-for="IsActive" class="form-check-label"></label>
+                    </div>
+                </div>
+            </div>
+            <button type="submit" class="btn btn-primary mt-3">Create template</button>
+        </form>
+    </div>
+</div>
+
+@section Scripts { <partial name="_ValidationScriptsPartial" /> }

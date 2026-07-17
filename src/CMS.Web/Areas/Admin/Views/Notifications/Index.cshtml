@@ -1,0 +1,44 @@
+@model NotificationBroadcastViewModel
+@using CMS.Domain.Enums
+@{ ViewData["Title"] = "Broadcast notification"; }
+
+<div class="d-flex align-items-center justify-content-between mb-3">
+    <h1 class="h3 mb-0">Broadcast notification</h1>
+</div>
+
+<div class="card border-0 shadow-sm">
+    <div class="card-body" style="max-width: 640px;">
+        <p class="text-secondary">Sends a live notification (and a toast) to every signed-in user, and stores it in their inbox.</p>
+        <form asp-action="Send" method="post" class="row g-3">
+            <div asp-validation-summary="ModelOnly" class="text-danger small"></div>
+            <div class="col-md-8">
+                <label asp-for="Title" class="form-label"></label>
+                <input asp-for="Title" class="form-control" />
+                <span asp-validation-for="Title" class="text-danger small"></span>
+            </div>
+            <div class="col-md-4">
+                <label asp-for="Type" class="form-label"></label>
+                <select asp-for="Type" class="form-select">
+                    @foreach (var t in Enum.GetValues<NotificationType>())
+                    {
+                        <option value="@t">@t</option>
+                    }
+                </select>
+            </div>
+            <div class="col-12">
+                <label asp-for="Message" class="form-label"></label>
+                <textarea asp-for="Message" class="form-control" rows="3"></textarea>
+                <span asp-validation-for="Message" class="text-danger small"></span>
+            </div>
+            <div class="col-12">
+                <label asp-for="Link" class="form-label">Link (optional)</label>
+                <input asp-for="Link" class="form-control" placeholder="/Admin/Content/Pages" />
+            </div>
+            <div class="col-12">
+                <button type="submit" class="btn btn-primary"><i class="bi bi-broadcast me-1"></i>Broadcast</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts { <partial name="_ValidationScriptsPartial" /> }

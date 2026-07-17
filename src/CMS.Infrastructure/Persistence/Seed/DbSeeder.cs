@@ -34,9 +34,49 @@ public static class DbSeeder
         await SeedThemesAsync(db, cancellationToken);
         await SeedSettingsAsync(db, cancellationToken);
         await SeedMenusAsync(db, permissions, cancellationToken);
+        await EnsureExtraMenusAsync(db, permissions, cancellationToken);
         await SeedDemoContentAsync(db, cancellationToken);
 
         await db.SaveChangesAsync(cancellationToken);
+    }
+
+    /// <summary>
+    /// Idempotently adds menu items introduced after the initial menu seed, so
+    /// existing databases pick them up on the next startup (the main menu seed
+    /// only runs when the table is empty).
+    /// </summary>
+    private static async Task EnsureExtraMenusAsync(AppDbContext db, Dictionary<string, Permission> permissions, CancellationToken ct)
+    {
+        var system = await db.MenuItems.FirstOrDefaultAsync(m => m.Title == "System" && m.ParentId == null, ct);
+        if (system is null)
+        {
+            return; // fresh install: SeedMenusAsync already added everything
+        }
+
+        if (!await db.MenuItems.AnyAsync(m => m.Controller == "Notifications" && m.Area == "Admin", ct))
+        {
+            var item = new MenuItem
+            {
+                Id = Guid.NewGuid(),
+                TenantId = DomainDefaults.DefaultTenantId,
+                ParentId = system.Id,
+                Title = "Notifications",
+                Icon = "bi-broadcast",
+                Controller = "Notifications",
+                Action = "Index",
+                Area = "Admin",
+                SortOrder = 7,
+                IsVisible = true,
+                IsEnabled = true,
+            };
+
+            if (permissions.TryGetValue(Permissions.Notifications.Send, out var permission))
+            {
+                item.MenuPermissions.Add(new MenuItemPermission { Id = Guid.NewGuid(), PermissionId = permission.Id });
+            }
+
+            db.MenuItems.Add(item);
+        }
     }
 
     private static async Task SeedTenantAsync(AppDbContext db, CancellationToken ct)
@@ -300,6 +340,7 @@ public static class DbSeeder
         Child(system, "Feature Flags", "bi-toggles", "FeatureFlags", "Index", 4, Permissions.System.ManageFeatureFlags);
         Child(system, "Email Templates", "bi-envelope", "EmailTemplates", "Index", 5, Permissions.System.ManageEmailTemplates);
         Child(system, "Localization", "bi-translate", "Localization", "Index", 6, Permissions.Localization.View);
+        Child(system, "Notifications", "bi-broadcast", "Notifications", "Index", 7, Permissions.Notifications.Send);
 
         MenuItem Menu(string title, string icon, string? controller, string? action, int order, string permission)
         {

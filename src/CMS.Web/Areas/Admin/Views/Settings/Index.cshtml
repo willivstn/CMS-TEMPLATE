@@ -1,0 +1,56 @@
+@model IReadOnlyList<SettingGroupDto>
+@using CMS.Domain.Enums
+@{ ViewData["Title"] = "Settings"; }
+
+<div class="d-flex align-items-center justify-content-between mb-3">
+    <h1 class="h3 mb-0">Settings</h1>
+</div>
+
+<form asp-action="Index" method="post">
+    <div class="row g-3">
+        @foreach (var group in Model)
+        {
+            <div class="col-lg-6">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-header bg-transparent border-0 pt-3"><h2 class="h6 mb-0">@group.Group</h2></div>
+                    <div class="card-body">
+                        @foreach (var s in group.Items)
+                        {
+                            <div class="mb-3">
+                                <label class="form-label">@s.Key</label>
+                                @if (s.Description is not null)
+                                {
+                                    <div class="text-secondary small mb-1">@s.Description</div>
+                                }
+                                @switch (s.Type)
+                                {
+                                    case SettingType.Boolean:
+                                        <select name="values[@s.Key]" class="form-select form-select-sm">
+                                            <option value="true" selected="@(s.Value == "true")">Enabled</option>
+                                            <option value="false" selected="@(s.Value != "true")">Disabled</option>
+                                        </select>
+                                        break;
+                                    case SettingType.Integer:
+                                        <input type="number" name="values[@s.Key]" value="@s.Value" class="form-control form-control-sm" />
+                                        break;
+                                    case SettingType.Encrypted:
+                                        <input type="password" name="values[@s.Key]" class="form-control form-control-sm" placeholder="•••••• (leave blank to keep)" autocomplete="new-password" />
+                                        break;
+                                    case SettingType.Json:
+                                        <textarea name="values[@s.Key]" rows="3" class="form-control form-control-sm font-monospace">@s.Value</textarea>
+                                        break;
+                                    default:
+                                        <input type="text" name="values[@s.Key]" value="@s.Value" class="form-control form-control-sm" />
+                                        break;
+                                }
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+    <div class="mt-3">
+        <button type="submit" class="btn btn-primary">Save settings</button>
+    </div>
+</form>

@@ -2,8 +2,27 @@ using CMS.Application;
 using CMS.Infrastructure;
 using CMS.Infrastructure.Persistence;
 using CMS.Web;
+using CMS.Web.Jobs;
+using CMS.Web.Logging;
+using CMS.Web.Realtime;
+using Hangfire;
+using Serilog;
+using Serilog.Events;
 
 var builder = WebApplication.CreateBuilder(args);
+
+// Structured logging: console + rolling file for everything, plus a database sink
+// (warnings and above) that powers the in-app log viewer.
+builder.Host.UseSerilog((context, services, configuration) => configuration
+    .MinimumLevel.Information()
+    .MinimumLevel.Override("Microsoft", LogEventLevel.Warning)
+    .MinimumLevel.Override("Microsoft.EntityFrameworkCore", LogEventLevel.Warning)
+    .MinimumLevel.Override("Microsoft.AspNetCore", LogEventLevel.Warning)
+    .Enrich.FromLogContext()
+    .WriteTo.Console(formatProvider: System.Globalization.CultureInfo.InvariantCulture)
+    .WriteTo.File("logs/cms-.log", rollingInterval: RollingInterval.Day, retainedFileCountLimit: 14,
+        formatProvider: System.Globalization.CultureInfo.InvariantCulture)
+    .WriteTo.Sink(new DatabaseLogSink(services.GetRequiredService<IServiceScopeFactory>())));
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
@@ -12,7 +31,7 @@ builder.Services.AddControllersWithViews();
 // so the composition root stays a thin, readable list of capabilities.
 builder.Services.AddApplication();
 builder.Services.AddInfrastructure(builder.Configuration);
-builder.Services.AddWebServices();
+builder.Services.AddWebServices(builder.Configuration);
 
 var app = builder.Build();
 
@@ -28,15 +47,21 @@ using (var scope = app.Services.CreateScope())
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
-    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
 }
 
+app.UseSerilogRequestLogging();
 app.UseHttpsRedirection();
 app.UseRouting();
 
 app.UseAuthentication();
 app.UseAuthorization();
+
+// Hangfire dashboard, restricted to job managers.
+app.UseHangfireDashboard("/hangfire", new DashboardOptions
+{
+    Authorization = [new HangfireDashboardAuthFilter()],
+});
 
 app.MapStaticAssets();
 
@@ -50,5 +75,11 @@ app.MapControllerRoute(
     pattern: "{controller=Home}/{action=Index}/{id?}")
     .WithStaticAssets();
 
+app.MapHub<NotificationHub>("/hubs/notifications");
+
+// Recurring background jobs.
+RecurringJob.AddOrUpdate<ScheduledContentPublisher>("scheduled-content", j => j.PublishDueAsync(), Cron.Minutely);
+RecurringJob.AddOrUpdate<EmailQueueProcessor>("email-queue", j => j.ProcessAsync(), Cron.Minutely);
+RecurringJob.AddOrUpdate<CleanupJob>("cleanup", j => j.RunAsync(), Cron.Daily);
 
 app.Run();
