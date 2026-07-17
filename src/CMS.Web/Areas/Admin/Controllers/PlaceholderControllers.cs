@@ -20,35 +20,7 @@ public abstract class PlaceholderController : Controller
     }
 }
 
-[Area("Admin")]
-[HasPermission(Permissions.Content.View)]
-public sealed class ContentController : PlaceholderController
-{
-    public IActionResult Pages() => ComingSoon("Pages");
-    public IActionResult Posts() => ComingSoon("Posts");
-}
-
-[Area("Admin")]
-[HasPermission(Permissions.Categories.View)]
-public sealed class CategoriesController : PlaceholderController
-{
-    public IActionResult Index() => ComingSoon("Categories");
-}
-
-[Area("Admin")]
-[HasPermission(Permissions.Content.View)]
-public sealed class TagsController : PlaceholderController
-{
-    public IActionResult Index() => ComingSoon("Tags");
-}
-
-[Area("Admin")]
-[HasPermission(Permissions.Media.View)]
-public sealed class MediaController : PlaceholderController
-{
-    public IActionResult Index() => ComingSoon("Media Library");
-}
-
+// Content, Categories, Tags and Media are implemented in their own controllers (Phase 5).
 // Users, Roles and Permissions are implemented in their own controllers (Phase 4).
 
 [Area("Admin")]

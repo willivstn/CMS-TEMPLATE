@@ -1,0 +1,89 @@
+<link rel="stylesheet" href="~/lib/quill/quill.snow.css" />
+<script src="~/lib/quill/quill.js"></script>
+<script>
+(function () {
+    const bodyInput = document.getElementById('bodyInput');
+    const editorEl = document.getElementById('editor');
+    let pickerMode = 'featured';
+
+    const quill = new Quill(editorEl, {
+        theme: 'snow',
+        modules: {
+            toolbar: {
+                container: [
+                    [{ header: [2, 3, false] }],
+                    ['bold', 'italic', 'underline'],
+                    [{ list: 'ordered' }, { list: 'bullet' }],
+                    ['blockquote', 'code-block'],
+                    ['link', 'image'],
+                    ['clean']
+                ],
+                handlers: {
+                    image: function () {
+                        pickerMode = 'insert';
+                        bootstrap.Modal.getOrCreateInstance(document.getElementById('mediaPickerModal')).show();
+                    }
+                }
+            }
+        }
+    });
+
+    // Copy the editor HTML into the hidden field on submit.
+    editorEl.closest('form').addEventListener('submit', function () {
+        bodyInput.value = quill.root.innerHTML;
+    });
+
+    // Live slug suggestion (only when the slug is empty).
+    const titleInput = document.querySelector('[name="Title"]');
+    const slugInput = document.querySelector('[name="Slug"]');
+    if (titleInput && slugInput) {
+        titleInput.addEventListener('input', function () {
+            if (!slugInput.value.trim()) {
+                slugInput.placeholder = titleInput.value.trim().toLowerCase()
+                    .replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+            }
+        });
+    }
+
+    // Media picker.
+    const modalEl = document.getElementById('mediaPickerModal');
+    const body = document.getElementById('mediaPickerBody');
+
+    document.querySelectorAll('[data-picker-mode]').forEach(function (btn) {
+        btn.addEventListener('click', () => { pickerMode = btn.getAttribute('data-picker-mode'); });
+    });
+
+    modalEl.addEventListener('shown.bs.modal', function () {
+        body.innerHTML = '<div class="text-center text-secondary py-4">Loading…</div>';
+        fetch('@Url.Action("Picker", "Media", new { area = "Admin" })')
+            .then(r => r.text())
+            .then(html => { body.innerHTML = html; });
+    });
+
+    body.addEventListener('click', function (e) {
+        const pick = e.target.closest('[data-pick-url]');
+        if (!pick) return;
+        const url = pick.getAttribute('data-pick-url');
+        const id = pick.getAttribute('data-pick-id');
+
+        if (pickerMode === 'insert') {
+            const range = quill.getSelection(true);
+            quill.insertEmbed(range ? range.index : 0, 'image', url, 'user');
+        } else {
+            document.getElementById('featuredMediaId').value = id;
+            const preview = document.getElementById('featuredPreview');
+            preview.querySelector('img').src = url;
+            preview.classList.remove('d-none');
+        }
+        bootstrap.Modal.getInstance(modalEl).hide();
+    });
+
+    const clearBtn = document.getElementById('clearFeatured');
+    if (clearBtn) {
+        clearBtn.addEventListener('click', function () {
+            document.getElementById('featuredMediaId').value = '';
+            document.getElementById('featuredPreview').classList.add('d-none');
+        });
+    }
+})();
+</script>

@@ -43,6 +43,9 @@ secrets.json
 .env
 .env.*
 
+## User-uploaded media (runtime content, not source)
+**/wwwroot/uploads/
+
 ## Logs & databases
 logs/
 *.log

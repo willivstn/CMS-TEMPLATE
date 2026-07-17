@@ -1,0 +1,126 @@
+@model ContentFormViewModel
+@using CMS.Domain.Enums
+
+<input type="hidden" asp-for="Id" />
+<input type="hidden" asp-for="Type" />
+<div asp-validation-summary="ModelOnly" class="text-danger small mb-2"></div>
+
+<div class="row g-3">
+    <div class="col-lg-8">
+        <div class="card border-0 shadow-sm mb-3">
+            <div class="card-body">
+                <div class="mb-3">
+                    <label asp-for="Title" class="form-label"></label>
+                    <input asp-for="Title" class="form-control form-control-lg" />
+                    <span asp-validation-for="Title" class="text-danger small"></span>
+                </div>
+                <div class="mb-3">
+                    <label asp-for="Slug" class="form-label"></label>
+                    <input asp-for="Slug" class="form-control" placeholder="auto-generated from title" />
+                </div>
+                <div class="mb-3">
+                    <label asp-for="Summary" class="form-label"></label>
+                    <textarea asp-for="Summary" class="form-control" rows="2"></textarea>
+                </div>
+                <div>
+                    <label class="form-label">Body</label>
+                    <textarea asp-for="Body" id="bodyInput" class="d-none"></textarea>
+                    <div id="editorToolbar"></div>
+                    <div id="editor" style="min-height:280px;">@Html.Raw(Model.Body)</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-transparent border-0 pt-3"><h2 class="h6 mb-0"><i class="bi bi-search me-2"></i>SEO</h2></div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <label asp-for="MetaTitle" class="form-label"></label>
+                    <input asp-for="MetaTitle" class="form-control" />
+                </div>
+                <div class="mb-3">
+                    <label asp-for="MetaDescription" class="form-label"></label>
+                    <textarea asp-for="MetaDescription" class="form-control" rows="2"></textarea>
+                </div>
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="MetaKeywords" class="form-label"></label>
+                        <input asp-for="MetaKeywords" class="form-control" />
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="CanonicalUrl" class="form-label"></label>
+                        <input asp-for="CanonicalUrl" class="form-control" />
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-4">
+        <div class="card border-0 shadow-sm mb-3">
+            <div class="card-body">
+                @if (Model.Id is null)
+                {
+                    <div class="mb-3">
+                        <label asp-for="Status" class="form-label">Initial status</label>
+                        <select asp-for="Status" class="form-select">
+                            <option value="@ContentStatus.Draft">Draft</option>
+                            <option value="@ContentStatus.Published">Published</option>
+                        </select>
+                    </div>
+                }
+                <div class="mb-3">
+                    <label asp-for="CategoryId" class="form-label"></label>
+                    <select asp-for="CategoryId" class="form-select">
+                        <option value="">— none —</option>
+                        @foreach (var c in Model.Categories)
+                        {
+                            <option value="@c.Id" selected="@(Model.CategoryId == c.Id)">@c.Name</option>
+                        }
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label asp-for="Tags" class="form-label"></label>
+                    <input asp-for="Tags" class="form-control" placeholder="news, featured" />
+                </div>
+                @if (Model.Type == ContentType.Page)
+                {
+                    <div class="form-check form-switch">
+                        <input asp-for="IsHomePage" class="form-check-input" role="switch" />
+                        <label asp-for="IsHomePage" class="form-check-label"></label>
+                    </div>
+                }
+            </div>
+        </div>
+
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-transparent border-0 pt-3"><h2 class="h6 mb-0">Featured image</h2></div>
+            <div class="card-body">
+                <input type="hidden" asp-for="FeaturedMediaId" id="featuredMediaId" />
+                <div id="featuredPreview" class="mb-2 @(Model.FeaturedMediaUrl is null ? "d-none" : null)">
+                    <img src="@Model.FeaturedMediaUrl" class="img-fluid rounded border" alt="Featured" />
+                </div>
+                <div class="d-flex gap-2">
+                    <button type="button" class="btn btn-sm btn-outline-secondary" data-picker-mode="featured"
+                            data-bs-toggle="modal" data-bs-target="#mediaPickerModal">Choose image</button>
+                    <button type="button" class="btn btn-sm btn-outline-danger" id="clearFeatured">Clear</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@* Media picker modal (shared by featured image + editor image insert) *@
+<div class="modal fade" id="mediaPickerModal" tabindex="-1">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Media library</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="mediaPickerBody">
+                <div class="text-center text-secondary py-4">Loading…</div>
+            </div>
+        </div>
+    </div>
+</div>

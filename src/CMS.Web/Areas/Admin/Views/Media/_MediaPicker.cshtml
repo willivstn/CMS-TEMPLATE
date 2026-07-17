@@ -1,0 +1,30 @@
+@model PagedResult<CMS.Application.Features.Media.MediaItemDto>
+
+@if (Model.Items.Count == 0)
+{
+    <p class="text-secondary text-center py-4 mb-0">No media yet. Upload files from the Media Library.</p>
+}
+else
+{
+    <div class="row g-2">
+        @foreach (var item in Model.Items)
+        {
+            <div class="col-4 col-md-3">
+                <div class="border rounded p-1 h-100 text-center cms-pick" role="button"
+                     data-pick-url="@item.Url" data-pick-id="@item.Id" title="@item.OriginalFileName">
+                    @if (item.ThumbnailUrl is not null || item.Type == CMS.Domain.Enums.MediaType.Image)
+                    {
+                        <img src="@(item.ThumbnailUrl ?? item.Url)" class="img-fluid rounded" alt="@item.AltText" style="height:90px;object-fit:cover;width:100%;" />
+                    }
+                    else
+                    {
+                        <div class="d-flex align-items-center justify-content-center bg-body-tertiary rounded" style="height:90px;">
+                            <i class="bi bi-file-earmark fs-2 text-secondary"></i>
+                        </div>
+                    }
+                    <div class="small text-truncate mt-1">@item.OriginalFileName</div>
+                </div>
+            </div>
+        }
+    </div>
+}

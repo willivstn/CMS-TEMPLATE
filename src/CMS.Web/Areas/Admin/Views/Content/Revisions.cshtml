@@ -1,0 +1,42 @@
+@model IReadOnlyList<CMS.Application.Features.Content.ContentVersionDto>
+@{
+    ViewData["Title"] = "Revisions";
+    var contentId = (Guid)ViewBag.ContentId;
+}
+
+<div class="d-flex align-items-center justify-content-between mb-3">
+    <h1 class="h3 mb-0">Revision history</h1>
+    <a asp-action="Edit" asp-route-id="@contentId" class="btn btn-sm btn-outline-secondary">Back to edit</a>
+</div>
+
+<div class="card border-0 shadow-sm">
+    <div class="card-body">
+        <table class="table align-middle mb-0">
+            <thead>
+                <tr class="text-secondary small"><th>Version</th><th>Title</th><th>Status</th><th>Note</th><th>When</th><th>By</th><th class="text-end">Actions</th></tr>
+            </thead>
+            <tbody>
+            @foreach (var v in Model)
+            {
+                <tr>
+                    <td><span class="badge text-bg-light border">v@(v.VersionNumber)</span></td>
+                    <td class="small">@v.Title</td>
+                    <td class="small">@v.Status</td>
+                    <td class="small text-secondary">@v.Note</td>
+                    <td class="small text-secondary">@v.CreatedOnUtc.LocalDateTime.ToString("g")</td>
+                    <td class="small text-secondary">@v.CreatedBy</td>
+                    <td class="text-end">
+                        <form asp-action="Restore" asp-route-id="@contentId" asp-route-version="@v.VersionNumber" method="post" class="d-inline">
+                            <button class="btn btn-sm btn-outline-secondary" data-cms-confirm="Restore version @v.VersionNumber?">Restore</button>
+                        </form>
+                    </td>
+                </tr>
+            }
+            @if (Model.Count == 0)
+            {
+                <tr><td colspan="7" class="text-center text-secondary py-4">No revisions.</td></tr>
+            }
+            </tbody>
+        </table>
+    </div>
+</div>

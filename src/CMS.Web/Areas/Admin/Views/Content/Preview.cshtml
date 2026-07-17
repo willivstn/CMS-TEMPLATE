@@ -1,0 +1,32 @@
+@model CMS.Application.Features.Content.ContentPreviewDto
+@using CMS.Domain.Enums
+@{
+    ViewData["Title"] = "Preview · " + Model.Title;
+}
+
+<div class="d-flex align-items-center justify-content-between mb-3">
+    <span class="badge text-bg-secondary">Preview — @Model.Status</span>
+    <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-sm btn-outline-secondary">Back to edit</a>
+</div>
+
+<article class="card border-0 shadow-sm">
+    <div class="card-body px-lg-5 py-4" style="max-width: 820px; margin: 0 auto;">
+        @if (Model.FeaturedMediaUrl is not null)
+        {
+            <img src="@Model.FeaturedMediaUrl" class="img-fluid rounded mb-4" alt="@Model.Title" />
+        }
+        <h1 class="mb-2">@Model.Title</h1>
+        <p class="text-secondary">
+            @(Model.Type) @(Model.Author is not null ? $"· by {Model.Author}" : "")
+            @(Model.PublishedOnUtc is not null ? $"· {Model.PublishedOnUtc.Value.LocalDateTime:D}" : "")
+        </p>
+        @if (!string.IsNullOrWhiteSpace(Model.Summary))
+        {
+            <p class="lead">@Model.Summary</p>
+        }
+        <hr />
+        <div class="cms-content-body">
+            @Html.Raw(Model.Body)
+        </div>
+    </div>
+</article>

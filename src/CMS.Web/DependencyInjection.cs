@@ -32,6 +32,10 @@ public static class DependencyInjection
         // Database-driven, permission-filtered navigation.
         services.AddScoped<CMS.Web.Navigation.INavigationService, CMS.Web.Navigation.NavigationService>();
 
+        // File storage (local by default) and the upload/thumbnail pipeline.
+        services.AddScoped<CMS.Application.Common.Abstractions.IFileStorage, CMS.Web.Storage.LocalFileStorage>();
+        services.AddScoped<CMS.Web.Storage.MediaUploadService>();
+
         services.AddIdentity<ApplicationUser, ApplicationRole>(options =>
             {
                 options.Password.RequiredLength = 8;
