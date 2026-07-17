@@ -53,24 +53,32 @@ public static class DbSeeder
             return; // fresh install: SeedMenusAsync already added everything
         }
 
-        if (!await db.MenuItems.AnyAsync(m => m.Controller == "Notifications" && m.Area == "Admin", ct))
+        await EnsureChildAsync("Notifications", "bi-broadcast", "Notifications", 7, Permissions.Notifications.Send);
+        await EnsureChildAsync("API Keys", "bi-key", "ApiKeys", 8, Permissions.System.ManageApiKeys);
+
+        async Task EnsureChildAsync(string title, string icon, string controller, int sortOrder, string permissionName)
         {
+            if (await db.MenuItems.AnyAsync(m => m.Controller == controller && m.Area == "Admin", ct))
+            {
+                return;
+            }
+
             var item = new MenuItem
             {
                 Id = Guid.NewGuid(),
                 TenantId = DomainDefaults.DefaultTenantId,
                 ParentId = system.Id,
-                Title = "Notifications",
-                Icon = "bi-broadcast",
-                Controller = "Notifications",
+                Title = title,
+                Icon = icon,
+                Controller = controller,
                 Action = "Index",
                 Area = "Admin",
-                SortOrder = 7,
+                SortOrder = sortOrder,
                 IsVisible = true,
                 IsEnabled = true,
             };
 
-            if (permissions.TryGetValue(Permissions.Notifications.Send, out var permission))
+            if (permissions.TryGetValue(permissionName, out var permission))
             {
                 item.MenuPermissions.Add(new MenuItemPermission { Id = Guid.NewGuid(), PermissionId = permission.Id });
             }
@@ -341,6 +349,7 @@ public static class DbSeeder
         Child(system, "Email Templates", "bi-envelope", "EmailTemplates", "Index", 5, Permissions.System.ManageEmailTemplates);
         Child(system, "Localization", "bi-translate", "Localization", "Index", 6, Permissions.Localization.View);
         Child(system, "Notifications", "bi-broadcast", "Notifications", "Index", 7, Permissions.Notifications.Send);
+        Child(system, "API Keys", "bi-key", "ApiKeys", "Index", 8, Permissions.System.ManageApiKeys);
 
         MenuItem Menu(string title, string icon, string? controller, string? action, int order, string permission)
         {

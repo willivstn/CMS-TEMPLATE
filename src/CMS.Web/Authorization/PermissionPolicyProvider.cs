@@ -1,4 +1,7 @@
+using CMS.Web.Security;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Options;
 
 namespace CMS.Web.Authorization;
@@ -26,7 +29,12 @@ public sealed class PermissionPolicyProvider : IAuthorizationPolicyProvider
         var permission = HasPermissionAttribute.GetPermission(policyName);
         if (permission is not null)
         {
-            var policy = new AuthorizationPolicyBuilder()
+            // Accept the MVC cookie, API JWT and API-key schemes so the same
+            // [HasPermission] attribute guards both the admin UI and the REST API.
+            var policy = new AuthorizationPolicyBuilder(
+                    IdentityConstants.ApplicationScheme,
+                    JwtBearerDefaults.AuthenticationScheme,
+                    ApiKeyAuthenticationHandler.SchemeName)
                 .RequireAuthenticatedUser()
                 .AddRequirements(new PermissionRequirement(permission))
                 .Build();

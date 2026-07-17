@@ -5,6 +5,7 @@ using CMS.Web;
 using CMS.Web.Jobs;
 using CMS.Web.Logging;
 using CMS.Web.Realtime;
+using CMS.Web.Security;
 using Hangfire;
 using Serilog;
 using Serilog.Events;
@@ -44,15 +45,23 @@ using (var scope = app.Services.CreateScope())
 }
 
 // Configure the HTTP request pipeline.
-if (!app.Environment.IsDevelopment())
+if (app.Environment.IsDevelopment())
+{
+    app.UseSwagger();
+    app.UseSwaggerUI();
+}
+else
 {
     app.UseExceptionHandler("/Home/Error");
     app.UseHsts();
 }
 
 app.UseSerilogRequestLogging();
+app.UseMiddleware<SecurityHeadersMiddleware>();
 app.UseHttpsRedirection();
 app.UseRouting();
+
+app.UseRateLimiter();
 
 app.UseAuthentication();
 app.UseAuthorization();
@@ -74,6 +83,9 @@ app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}")
     .WithStaticAssets();
+
+// Attribute-routed REST API controllers (api/v{version}/...).
+app.MapControllers();
 
 app.MapHub<NotificationHub>("/hubs/notifications");
 

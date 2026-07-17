@@ -3,6 +3,8 @@ using CMS.Application.Identity;
 using CMS.Domain.Entities.Identity;
 using CMS.Infrastructure.Identity;
 using CMS.Infrastructure.Persistence;
+using System.Text;
+using Asp.Versioning;
 using CMS.Web.Authorization;
 using CMS.Web.Email;
 using CMS.Web.Identity;
@@ -13,6 +15,9 @@ using Hangfire;
 using Hangfire.SqlServer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.RateLimiting;
+using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi;
 using IAppAuthenticationService = CMS.Application.Identity.IAuthenticationService;
 
 namespace CMS.Web;
@@ -108,6 +113,80 @@ public static class DependencyInjection
         services.AddSingleton<IAuthorizationPolicyProvider, PermissionPolicyProvider>();
         services.AddSingleton<IAuthorizationHandler, PermissionAuthorizationHandler>();
         services.AddAuthorization();
+
+        services.AddApiServices(configuration);
+
+        return services;
+    }
+
+    /// <summary>
+    /// Registers the REST API stack: JWT + API-key authentication schemes, token
+    /// service, API versioning, Swagger/OpenAPI, and rate-limiting policies.
+    /// </summary>
+    private static IServiceCollection AddApiServices(this IServiceCollection services, IConfiguration configuration)
+    {
+        var jwt = configuration.GetSection(JwtOptions.SectionName).Get<JwtOptions>() ?? new JwtOptions();
+        services.Configure<JwtOptions>(configuration.GetSection(JwtOptions.SectionName));
+        services.AddScoped<ITokenService, JwtTokenService>();
+
+        services.AddAuthentication()
+            .AddJwtBearer(options =>
+            {
+                options.TokenValidationParameters = new TokenValidationParameters
+                {
+                    ValidateIssuer = true,
+                    ValidIssuer = jwt.Issuer,
+                    ValidateAudience = true,
+                    ValidAudience = jwt.Audience,
+                    ValidateIssuerSigningKey = true,
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwt.SigningKey)),
+                    ValidateLifetime = true,
+                    ClockSkew = TimeSpan.FromMinutes(1),
+                };
+            })
+            .AddScheme<ApiKeyAuthenticationOptions, ApiKeyAuthenticationHandler>(ApiKeyAuthenticationHandler.SchemeName, null);
+
+        services.AddApiVersioning(options =>
+            {
+                options.DefaultApiVersion = new ApiVersion(1, 0);
+                options.AssumeDefaultVersionWhenUnspecified = true;
+                options.ReportApiVersions = true;
+            })
+            .AddApiExplorer(options =>
+            {
+                options.GroupNameFormat = "'v'VVV";
+                options.SubstituteApiVersionInUrl = true;
+            });
+
+        services.AddEndpointsApiExplorer();
+        services.AddSwaggerGen(options =>
+        {
+            options.SwaggerDoc("v1", new OpenApiInfo { Title = "CMS Template API", Version = "v1" });
+
+            options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+            {
+                Name = "Authorization",
+                Type = SecuritySchemeType.Http,
+                Scheme = "bearer",
+                BearerFormat = "JWT",
+                In = ParameterLocation.Header,
+                Description = "JWT access token from /api/v1/auth/login.",
+            });
+            options.AddSecurityDefinition("ApiKey", new OpenApiSecurityScheme
+            {
+                Name = "X-Api-Key",
+                Type = SecuritySchemeType.ApiKey,
+                In = ParameterLocation.Header,
+                Description = "An API key created in the admin area.",
+            });
+        });
+
+        services.AddRateLimiter(options =>
+        {
+            options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+            options.AddFixedWindowLimiter("api", o => { o.Window = TimeSpan.FromSeconds(10); o.PermitLimit = 100; });
+            options.AddFixedWindowLimiter("auth", o => { o.Window = TimeSpan.FromMinutes(1); o.PermitLimit = 10; });
+        });
 
         return services;
     }

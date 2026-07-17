@@ -1,0 +1,84 @@
+@model IReadOnlyList<CMS.Application.Features.ApiKeys.ApiKeyListDto>
+@{ ViewData["Title"] = "API Keys"; var plainKey = TempData["ApiKey:Plain"] as string; }
+
+<div class="d-flex align-items-center justify-content-between mb-3">
+    <h1 class="h3 mb-0">API Keys</h1>
+</div>
+
+@if (!string.IsNullOrEmpty(plainKey))
+{
+    <div class="alert alert-warning">
+        <div class="fw-semibold mb-1"><i class="bi bi-key me-1"></i>Your new API key</div>
+        <div class="input-group">
+            <input type="text" class="form-control font-monospace" value="@plainKey" readonly onclick="this.select()" />
+        </div>
+        <div class="small mt-1">Send it as the <code>X-Api-Key</code> header. This is the only time it will be shown.</div>
+    </div>
+}
+
+<div class="row g-3">
+    <div class="col-lg-4">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-transparent border-0 pt-3"><h2 class="h6 mb-0">New key</h2></div>
+            <div class="card-body">
+                <form asp-action="Create" method="post">
+                    <div class="mb-2"><input name="name" class="form-control form-control-sm" placeholder="Name" required /></div>
+                    <div class="mb-2">
+                        <input name="scopes" class="form-control form-control-sm" placeholder="Scopes (e.g. Content.View)" />
+                        <div class="form-text">Comma-separated permissions the key grants.</div>
+                    </div>
+                    <div class="mb-2">
+                        <label class="form-label small text-secondary">Expires (optional)</label>
+                        <input type="date" name="expiresOn" class="form-control form-control-sm" />
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-sm">Create key</button>
+                </form>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-8">
+        <div class="card border-0 shadow-sm">
+            <div class="card-body">
+                <table class="table table-hover align-middle mb-0">
+                    <thead><tr class="text-secondary small"><th>Name</th><th>Prefix</th><th>Scopes</th><th>Status</th><th class="text-end">Actions</th></tr></thead>
+                    <tbody>
+                    @foreach (var k in Model)
+                    {
+                        <tr>
+                            <td class="fw-medium">@k.Name</td>
+                            <td><code class="small">@k.Prefix</code></td>
+                            <td class="small text-secondary">@k.Scopes</td>
+                            <td>
+                                @if (!k.IsActive)
+                                {
+                                    <span class="badge text-bg-secondary">Revoked</span>
+                                }
+                                else if (k.ExpiresOnUtc is { } e && e <= DateTimeOffset.UtcNow)
+                                {
+                                    <span class="badge text-bg-warning">Expired</span>
+                                }
+                                else
+                                {
+                                    <span class="badge text-bg-success">Active</span>
+                                }
+                            </td>
+                            <td class="text-end">
+                                @if (k.IsActive)
+                                {
+                                    <form asp-action="Revoke" asp-route-id="@k.Id" method="post" class="d-inline">
+                                        <button class="btn btn-sm btn-outline-danger" data-cms-confirm="Revoke '@k.Name'?">Revoke</button>
+                                    </form>
+                                }
+                            </td>
+                        </tr>
+                    }
+                    @if (Model.Count == 0)
+                    {
+                        <tr><td colspan="5" class="text-center text-secondary py-4">No API keys yet.</td></tr>
+                    }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
