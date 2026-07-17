@@ -49,26 +49,7 @@ public sealed class MediaController : PlaceholderController
     public IActionResult Index() => ComingSoon("Media Library");
 }
 
-[Area("Admin")]
-[HasPermission(Permissions.Users.View)]
-public sealed class UsersController : PlaceholderController
-{
-    public IActionResult Index() => ComingSoon("Users");
-}
-
-[Area("Admin")]
-[HasPermission(Permissions.Roles.View)]
-public sealed class RolesController : PlaceholderController
-{
-    public IActionResult Index() => ComingSoon("Roles");
-}
-
-[Area("Admin")]
-[HasPermission(Permissions.PermissionsAdmin.View)]
-public sealed class PermissionsController : PlaceholderController
-{
-    public IActionResult Index() => ComingSoon("Permissions");
-}
+// Users, Roles and Permissions are implemented in their own controllers (Phase 4).
 
 [Area("Admin")]
 [HasPermission(Permissions.Settings.View)]

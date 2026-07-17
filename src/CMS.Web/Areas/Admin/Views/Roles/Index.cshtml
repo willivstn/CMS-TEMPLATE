@@ -1,0 +1,51 @@
+@model IReadOnlyList<RoleListItemDto>
+@{ ViewData["Title"] = "Roles"; }
+
+<div class="d-flex align-items-center justify-content-between mb-3">
+    <h1 class="h3 mb-0">Roles</h1>
+    <a asp-action="Create" class="btn btn-primary btn-sm"><i class="bi bi-plus-lg me-1"></i>New role</a>
+</div>
+
+<div class="card border-0 shadow-sm">
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead>
+                    <tr class="text-secondary small">
+                        <th>Role</th><th>Users</th><th>Permissions</th><th class="text-end">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                @foreach (var role in Model)
+                {
+                    <tr>
+                        <td>
+                            <div class="fw-medium">
+                                @role.Name
+                                @if (role.IsSystem)
+                                {
+                                    <span class="badge text-bg-light border ms-1">system</span>
+                                }
+                            </div>
+                            <div class="text-secondary small">@role.Description</div>
+                        </td>
+                        <td>@role.UserCount</td>
+                        <td>@role.PermissionCount</td>
+                        <td class="text-end">
+                            <a asp-action="Permissions" asp-route-id="@role.Id" class="btn btn-sm btn-outline-secondary">Permissions</a>
+                            <a asp-action="Edit" asp-route-id="@role.Id" class="btn btn-sm btn-outline-secondary">Edit</a>
+                            @if (!role.IsSystem)
+                            {
+                                <form asp-action="Delete" asp-route-id="@role.Id" method="post" class="d-inline">
+                                    <button type="submit" class="btn btn-sm btn-outline-danger"
+                                            data-cms-confirm="Delete the role '@role.Name'?">Delete</button>
+                                </form>
+                            }
+                        </td>
+                    </tr>
+                }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

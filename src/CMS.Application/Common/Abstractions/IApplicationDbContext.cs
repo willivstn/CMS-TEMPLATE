@@ -22,6 +22,11 @@ namespace CMS.Application.Common.Abstractions;
 /// </summary>
 public interface IApplicationDbContext
 {
+    // Identity read models (writes go through IIdentityService / the Identity managers).
+    DbSet<ApplicationUser> Users { get; }
+    DbSet<ApplicationRole> Roles { get; }
+    DbSet<ApplicationUserRole> UserRoles { get; }
+
     DbSet<Permission> Permissions { get; }
     DbSet<RolePermission> RolePermissions { get; }
     DbSet<UserPermission> UserPermissions { get; }

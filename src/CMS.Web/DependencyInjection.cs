@@ -27,6 +27,7 @@ public static class DependencyInjection
         // HttpContext-backed current user overrides the Infrastructure system default.
         services.AddScoped<ICurrentUser, CurrentUser>();
         services.AddScoped<IAppAuthenticationService, AuthenticationService>();
+        services.AddScoped<CMS.Application.Identity.IIdentityService, IdentityService>();
 
         // Database-driven, permission-filtered navigation.
         services.AddScoped<CMS.Web.Navigation.INavigationService, CMS.Web.Navigation.NavigationService>();

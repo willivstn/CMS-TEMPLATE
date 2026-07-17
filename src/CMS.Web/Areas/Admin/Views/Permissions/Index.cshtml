@@ -1,0 +1,34 @@
+@model IReadOnlyList<PermissionGroupDto>
+@{ ViewData["Title"] = "Permissions"; }
+
+<div class="d-flex align-items-center justify-content-between mb-3">
+    <div>
+        <h1 class="h3 mb-0">Permissions</h1>
+        <span class="text-secondary">The permission catalogue. Assign these to roles or individual users.</span>
+    </div>
+</div>
+
+<div class="row g-3">
+    @foreach (var group in Model)
+    {
+        <div class="col-lg-6 col-xl-4">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-transparent border-0 pt-3 d-flex align-items-center justify-content-between">
+                    <h2 class="h6 mb-0">@group.Group</h2>
+                    <span class="badge text-bg-light border">@group.Items.Count</span>
+                </div>
+                <div class="card-body pt-2">
+                    <ul class="list-unstyled mb-0">
+                        @foreach (var p in group.Items)
+                        {
+                            <li class="py-1 border-bottom">
+                                <div class="small fw-medium">@p.DisplayName</div>
+                                <code class="text-secondary" style="font-size:.72rem">@p.Name</code>
+                            </li>
+                        }
+                    </ul>
+                </div>
+            </div>
+        </div>
+    }
+</div>

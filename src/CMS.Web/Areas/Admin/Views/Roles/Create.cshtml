@@ -1,0 +1,30 @@
+@model RoleFormViewModel
+@{ ViewData["Title"] = "New role"; }
+
+<div class="d-flex align-items-center justify-content-between mb-3">
+    <h1 class="h3 mb-0">New role</h1>
+    <a asp-action="Index" class="btn btn-sm btn-outline-secondary">Back to list</a>
+</div>
+
+<div class="card border-0 shadow-sm">
+    <div class="card-body">
+        <form asp-action="Create" method="post" class="row g-3" style="max-width: 560px;">
+            <div asp-validation-summary="ModelOnly" class="text-danger small"></div>
+            <div class="col-12">
+                <label asp-for="Name" class="form-label"></label>
+                <input asp-for="Name" class="form-control" />
+                <span asp-validation-for="Name" class="text-danger small"></span>
+            </div>
+            <div class="col-12">
+                <label asp-for="Description" class="form-label"></label>
+                <textarea asp-for="Description" class="form-control" rows="2"></textarea>
+                <span asp-validation-for="Description" class="text-danger small"></span>
+            </div>
+            <div class="col-12">
+                <button type="submit" class="btn btn-primary">Create role</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts { <partial name="_ValidationScriptsPartial" /> }

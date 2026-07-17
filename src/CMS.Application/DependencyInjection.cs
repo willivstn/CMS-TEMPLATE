@@ -19,8 +19,8 @@ public static class DependencyInjection
         services.AddMediatR(cfg =>
         {
             cfg.RegisterServicesFromAssembly(assembly);
-            // Pipeline behaviours (validation, logging, caching, transactions)
-            // are added here in later phases, in execution order.
+            // Cross-cutting behaviours run in registration order around handlers.
+            cfg.AddOpenBehavior(typeof(Common.Behaviors.ValidationBehavior<,>));
         });
 
         services.AddValidatorsFromAssembly(assembly, includeInternalTypes: true);
