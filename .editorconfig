@@ -58,6 +58,10 @@ indent_size = 2
 [*.{js,ts,css,scss,html,cshtml}]
 indent_size = 2
 
+# Test method names conventionally use underscores.
+[tests/**/*.cs]
+dotnet_diagnostic.CA1707.severity = none
+
 # EF Core migrations are tool-generated; don't hold them to style/analyzer rules.
 [**/Migrations/*.cs]
 generated_code = true

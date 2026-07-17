@@ -1,0 +1,37 @@
+# Local container stack: the CMS app plus a SQL Server instance.
+# Usage:  docker compose up --build   →   http://localhost:8080
+# The app applies migrations and seeds on startup. Default admin: admin@cms.local / Admin#12345
+
+services:
+  db:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    environment:
+      ACCEPT_EULA: "Y"
+      MSSQL_SA_PASSWORD: "Your_Strong_Passw0rd!"
+    ports:
+      - "1433:1433"
+    volumes:
+      - mssql-data:/var/opt/mssql
+    healthcheck:
+      test: ["CMD-SHELL", "/opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P \"$$MSSQL_SA_PASSWORD\" -C -Q \"SELECT 1\" || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "8080:8080"
+    environment:
+      ASPNETCORE_ENVIRONMENT: "Production"
+      ConnectionStrings__DefaultConnection: "Server=db;Database=CmsTemplate;User Id=sa;Password=Your_Strong_Passw0rd!;TrustServerCertificate=True;MultipleActiveResultSets=true"
+      # Override the JWT signing key for anything beyond a local trial.
+      Jwt__SigningKey: "compose-only-signing-key-change-me-0123456789abcdef"
+
+volumes:
+  mssql-data:

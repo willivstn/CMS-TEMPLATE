@@ -38,6 +38,37 @@ public sealed class GetSystemLogsQueryHandler(IApplicationDbContext db)
     }
 }
 
+// ---- Audit trail ---------------------------------------------------------
+
+public sealed record AuditLogDto(Guid Id, AuditAction Action, string? EntityName, string? EntityId, string? UserName, string? IpAddress, DateTimeOffset TimestampUtc);
+
+public sealed record GetAuditLogsQuery(string? Entity, string? Search, int Page = 1, int PageSize = 25) : IRequest<PagedResult<AuditLogDto>>;
+
+public sealed class GetAuditLogsQueryHandler(IApplicationDbContext db)
+    : IRequestHandler<GetAuditLogsQuery, PagedResult<AuditLogDto>>
+{
+    public async Task<PagedResult<AuditLogDto>> Handle(GetAuditLogsQuery request, CancellationToken cancellationToken)
+    {
+        var query = db.AuditLogs.AsNoTracking();
+
+        if (!string.IsNullOrWhiteSpace(request.Entity))
+        {
+            query = query.Where(a => a.EntityName == request.Entity);
+        }
+
+        if (!string.IsNullOrWhiteSpace(request.Search))
+        {
+            var term = request.Search.Trim();
+            query = query.Where(a => (a.UserName != null && a.UserName.Contains(term)) || (a.EntityId != null && a.EntityId.Contains(term)));
+        }
+
+        return await query
+            .OrderByDescending(a => a.TimestampUtc)
+            .Select(a => new AuditLogDto(a.Id, a.Action, a.EntityName, a.EntityId, a.UserName, a.IpAddress, a.TimestampUtc))
+            .ToPagedResultAsync(request.Page, request.PageSize, cancellationToken);
+    }
+}
+
 // ---- Job runs ------------------------------------------------------------
 
 public sealed record JobRunDto(Guid Id, string JobName, string JobType, JobStatus Status, int Progress, DateTimeOffset? StartedOnUtc, DateTimeOffset? FinishedOnUtc, string? Error, string? Result, string? TriggeredBy);

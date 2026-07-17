@@ -4,9 +4,8 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace CMS.Web.Areas.Admin.Controllers;
 
-// Remaining scaffolded sections that keep the navigation fully navigable until
-// their own phase. Content/Categories/Tags/Media = Phase 5; Users/Roles/Permissions
-// = Phase 4; Settings/Logs/Jobs/FeatureFlags/EmailTemplates/Notifications = Phase 6.
+// Remaining scaffolded section. Localization (resource/DB translation management)
+// is left as a documented extension point.
 
 /// <summary>Base for not-yet-implemented admin sections.</summary>
 public abstract class PlaceholderController : Controller
@@ -16,13 +15,6 @@ public abstract class PlaceholderController : Controller
         ViewData["Title"] = title;
         return View("ComingSoon");
     }
-}
-
-[Area("Admin")]
-[HasPermission(Permissions.Audit.View)]
-public sealed class AuditController : PlaceholderController
-{
-    public IActionResult Index() => ComingSoon("Audit Trail");
 }
 
 [Area("Admin")]

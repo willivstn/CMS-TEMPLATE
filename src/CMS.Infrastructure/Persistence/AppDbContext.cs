@@ -79,6 +79,8 @@ public class AppDbContext(
     public DbSet<LoginHistory> LoginHistories => Set<LoginHistory>();
     public DbSet<RefreshToken> RefreshTokens => Set<RefreshToken>();
 
+    public DbSet<Domain.Entities.Modules.Announcement> Announcements => Set<Domain.Entities.Modules.Announcement>();
+
     protected override void OnModelCreating(ModelBuilder builder)
     {
         base.OnModelCreating(builder);

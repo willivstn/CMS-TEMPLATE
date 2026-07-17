@@ -91,6 +91,13 @@ public static class Permissions
         public const string View = "Dashboard.View";
     }
 
+    /// <summary>Permissions contributed by the sample Announcements module.</summary>
+    public static class Announcements
+    {
+        public const string View = "Announcements.View";
+        public const string Manage = "Announcements.Manage";
+    }
+
     public static class System
     {
         public const string ViewLogs = "System.ViewLogs";

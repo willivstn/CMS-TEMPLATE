@@ -64,6 +64,9 @@ public interface IApplicationDbContext
     DbSet<Tenant> Tenants { get; }
     DbSet<Theme> Themes { get; }
 
+    // Sample module (Announcements).
+    DbSet<Domain.Entities.Modules.Announcement> Announcements { get; }
+
     DbSet<LoginHistory> LoginHistories { get; }
     DbSet<RefreshToken> RefreshTokens { get; }
 

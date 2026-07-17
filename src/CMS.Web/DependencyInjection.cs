@@ -98,7 +98,10 @@ public static class DependencyInjection
             options.Cookie.Name = "cms.auth";
             options.Cookie.HttpOnly = true;
             options.Cookie.SameSite = SameSiteMode.Lax;
-            options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
+            // SameAsRequest keeps the cookie usable over plain HTTP (local dev,
+            // Docker) while remaining Secure behind TLS. Force Always when every
+            // environment is guaranteed to terminate TLS.
+            options.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;
             options.LoginPath = "/Account/Login";
             options.LogoutPath = "/Account/Logout";
             options.AccessDeniedPath = "/Account/AccessDenied";

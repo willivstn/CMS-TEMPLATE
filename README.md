@@ -4,8 +4,11 @@ A production-ready, reusable Content Management System template for building ent
 ASP.NET Core applications. Built on **.NET 10 (LTS)** following **Clean Architecture**,
 **SOLID**, and permission-based security.
 
-> **Status:** under active construction. Phase 0 (solution skeleton) is complete and the
-> solution builds clean. See [Delivery Roadmap](#delivery-roadmap) for what's next.
+> **Status:** feature-complete across all delivery phases (0–8). The solution builds
+> clean, the test suite is green, and the app runs with an admin UI, REST API, and a
+> sample module. See the [Delivery Roadmap](#delivery-roadmap) and the guides in
+> [`docs/`](docs/): [database schema](docs/database-schema.md),
+> [extending / adding a module](docs/extending.md), [deployment](docs/deployment.md).
 
 ## Technology Stack
 
@@ -71,11 +74,17 @@ dotnet test CMS.slnx
 ## Delivery Roadmap
 
 - [x] **Phase 0** — Solution skeleton, base primitives, DI wiring, green build.
-- [ ] **Phase 1** — Domain model, EF Core config, migrations, seed data.
-- [ ] **Phase 2** — Identity authentication + permission-based authorization.
-- [ ] **Phase 3** — Admin shell UI, dynamic menu, breadcrumbs, reusable components.
-- [ ] **Phase 4** — User / Role / Permission management.
-- [ ] **Phase 5** — CMS content (pages, posts, versioning, workflow) + Media Library.
-- [ ] **Phase 6** — SignalR, background jobs, email, settings, caching, logging.
-- [ ] **Phase 7** — REST API (JWT, Swagger, versioning, rate limiting) + security hardening.
-- [ ] **Phase 8** — Sample plug-in module, Docker/CI, documentation, tests.
+- [x] **Phase 1** — Domain model, EF Core config, migrations, seed data.
+- [x] **Phase 2** — Identity authentication + permission-based authorization.
+- [x] **Phase 3** — Admin shell UI, dynamic menu, breadcrumbs, reusable components.
+- [x] **Phase 4** — User / Role / Permission management.
+- [x] **Phase 5** — CMS content (pages, posts, versioning, workflow) + Media Library.
+- [x] **Phase 6** — SignalR, background jobs, email, settings, caching, logging.
+- [x] **Phase 7** — REST API (JWT, Swagger, versioning, rate limiting) + security hardening.
+- [x] **Phase 8** — Sample module (Announcements), Docker/CI, documentation, tests.
+
+## REST API
+
+A versioned REST API lives under `/api/v1` with Swagger UI at `/swagger` (Development).
+Authenticate with a JWT (`POST /api/v1/auth/login`) or an `X-Api-Key` header. See the
+in-app Swagger docs for the full surface.

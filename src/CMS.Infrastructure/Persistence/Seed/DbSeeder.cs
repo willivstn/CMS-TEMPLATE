@@ -56,6 +56,31 @@ public static class DbSeeder
         await EnsureChildAsync("Notifications", "bi-broadcast", "Notifications", 7, Permissions.Notifications.Send);
         await EnsureChildAsync("API Keys", "bi-key", "ApiKeys", 8, Permissions.System.ManageApiKeys);
 
+        // Top-level entry for the sample Announcements module.
+        if (!await db.MenuItems.AnyAsync(m => m.Controller == "Announcements" && m.Area == "Admin", ct))
+        {
+            var announcements = new MenuItem
+            {
+                Id = Guid.NewGuid(),
+                TenantId = DomainDefaults.DefaultTenantId,
+                Title = "Announcements",
+                Icon = "bi-megaphone",
+                Controller = "Announcements",
+                Action = "Index",
+                Area = "Admin",
+                SortOrder = 5,
+                IsVisible = true,
+                IsEnabled = true,
+            };
+
+            if (permissions.TryGetValue(Permissions.Announcements.View, out var announcementsPermission))
+            {
+                announcements.MenuPermissions.Add(new MenuItemPermission { Id = Guid.NewGuid(), PermissionId = announcementsPermission.Id });
+            }
+
+            db.MenuItems.Add(announcements);
+        }
+
         async Task EnsureChildAsync(string title, string icon, string controller, int sortOrder, string permissionName)
         {
             if (await db.MenuItems.AnyAsync(m => m.Controller == controller && m.Area == "Admin", ct))
@@ -326,8 +351,10 @@ public static class DbSeeder
         var media = Menu("Media Library", "bi-images", "Media", "Index", 2, Permissions.Media.View);
         var access = Menu("Access Control", "bi-shield-lock", null, null, 3, Permissions.Users.View);
         var system = Menu("System", "bi-gear", null, null, 4, Permissions.Settings.View);
+        // Sample module contributing its own top-level navigation entry.
+        var announcements = Menu("Announcements", "bi-megaphone", "Announcements", "Index", 5, Permissions.Announcements.View);
 
-        db.MenuItems.AddRange(dashboard, content, media, access, system);
+        db.MenuItems.AddRange(dashboard, content, media, access, system, announcements);
 
         // Content children.
         Child(content, "Pages", "bi-file-earmark", "Content", "Pages", 0, Permissions.Content.View);
