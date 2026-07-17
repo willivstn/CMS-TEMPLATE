@@ -1,0 +1,91 @@
+@model PagedResult<TranslationDto>
+@{
+    ViewData["Title"] = "Translations";
+    var languages = ViewBag.Languages as IReadOnlyList<LanguageOptionDto> ?? [];
+    string? language = ViewBag.Language;
+    string? group = ViewBag.Group;
+    string? search = ViewBag.Search;
+}
+
+<div class="d-flex align-items-center justify-content-between mb-3">
+    <h1 class="h3 mb-0">Translations</h1>
+    <a asp-action="Index" class="btn btn-sm btn-outline-secondary">Languages</a>
+</div>
+
+<div class="row g-3">
+    <div class="col-lg-4">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-transparent border-0 pt-3"><h2 class="h6 mb-0">Add translation</h2></div>
+            <div class="card-body">
+                <form asp-action="CreateTranslation" method="post">
+                    <div class="mb-2"><input name="Key" class="form-control form-control-sm" placeholder="Key (e.g. Menu.Home)" required /></div>
+                    <div class="mb-2">
+                        <select name="LanguageCode" class="form-select form-select-sm" required>
+                            <option value="">Language…</option>
+                            @foreach (var l in languages)
+                            {
+                                <option value="@l.Code">@l.Name</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="mb-2"><input name="Group" class="form-control form-control-sm" placeholder="Group (optional)" /></div>
+                    <div class="mb-2"><textarea name="Value" class="form-control form-control-sm" rows="2" placeholder="Value" required></textarea></div>
+                    <button type="submit" class="btn btn-primary btn-sm">Add</button>
+                </form>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-8">
+        <div class="card border-0 shadow-sm">
+            <div class="card-body">
+                <form method="get" class="row g-2 align-items-end mb-3">
+                    <div class="col-md-4"><input type="search" name="search" value="@search" class="form-control form-control-sm" placeholder="Key or value" /></div>
+                    <div class="col-md-3">
+                        <select name="language" class="form-select form-select-sm">
+                            <option value="">All languages</option>
+                            @foreach (var l in languages)
+                            {
+                                <option value="@l.Code" selected="@(l.Code == language)">@l.Name</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="col-md-3"><input name="group" value="@group" class="form-control form-control-sm" placeholder="Group" /></div>
+                    <div class="col-md-2 d-grid"><button class="btn btn-outline-secondary btn-sm">Filter</button></div>
+                </form>
+
+                <div class="table-responsive">
+                    <table class="table table-sm align-middle mb-0">
+                        <thead><tr class="text-secondary small"><th>Key</th><th>Lang</th><th>Value</th><th></th></tr></thead>
+                        <tbody>
+                        @foreach (var t in Model.Items)
+                        {
+                            <tr>
+                                <td class="small"><code>@t.Key</code><div class="text-secondary" style="font-size:.7rem">@t.Group</div></td>
+                                <td class="small">@t.LanguageCode</td>
+                                <td>
+                                    <form asp-action="UpdateTranslation" method="post" class="d-flex gap-1">
+                                        <input type="hidden" name="id" value="@t.Id" />
+                                        <input type="hidden" name="group" value="@t.Group" />
+                                        <input name="value" value="@t.Value" class="form-control form-control-sm" />
+                                        <button class="btn btn-sm btn-outline-primary" title="Save"><i class="bi bi-check-lg"></i></button>
+                                    </form>
+                                </td>
+                                <td class="text-end">
+                                    <form asp-action="DeleteTranslation" asp-route-id="@t.Id" method="post" class="d-inline">
+                                        <button class="btn btn-sm btn-outline-danger" data-cms-confirm="Delete this translation?"><i class="bi bi-trash"></i></button>
+                                    </form>
+                                </td>
+                            </tr>
+                        }
+                        @if (Model.Items.Count == 0)
+                        {
+                            <tr><td colspan="4" class="text-center text-secondary py-4">No translations.</td></tr>
+                        }
+                        </tbody>
+                    </table>
+                </div>
+                <partial name="_Pager" model="@(new PagerModel(Model.PageNumber, Model.TotalPages, Model.TotalCount, Model.FirstItemIndex, Model.LastItemIndex))" />
+            </div>
+        </div>
+    </div>
+</div>

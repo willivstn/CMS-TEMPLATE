@@ -17,6 +17,7 @@
     <link rel="stylesheet" href="~/lib/bootstrap-icons/bootstrap-icons.min.css" />
     <link rel="stylesheet" href="~/css/admin.css" asp-append-version="true" />
     <meta name="csrf-token" content="@requestToken" />
+    <vc:theme-style></vc:theme-style>
 </head>
 <body>
 <div class="cms-app" id="cmsApp">
@@ -56,6 +57,7 @@
                         </div>
                     </div>
                 </div>
+                <vc:theme-picker></vc:theme-picker>
                 <button class="btn btn-sm btn-icon" id="cmsThemeToggle" type="button" aria-label="Toggle theme" title="Toggle theme">
                     <i class="bi bi-moon-stars cms-theme-icon-dark"></i>
                     <i class="bi bi-sun cms-theme-icon-light"></i>
@@ -67,6 +69,7 @@
                     </button>
                     <ul class="dropdown-menu dropdown-menu-end">
                         <li><h6 class="dropdown-header">@User.Identity?.Name</h6></li>
+                        <li><a class="dropdown-item" asp-area="" asp-controller="Manage" asp-action="Security"><i class="bi bi-shield-lock me-2"></i>Security (2FA)</a></li>
                         <li><a class="dropdown-item" asp-area="" asp-controller="Home" asp-action="Index"><i class="bi bi-globe me-2"></i>View site</a></li>
                         <li><hr class="dropdown-divider" /></li>
                         <li>

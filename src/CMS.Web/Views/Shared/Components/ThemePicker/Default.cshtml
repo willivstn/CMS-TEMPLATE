@@ -1,0 +1,23 @@
+@model IReadOnlyList<CMS.Application.Features.Theming.ThemeOptionDto>
+@{ var activeKey = Context.Request.Cookies["cms-theme-key"]; }
+
+<div class="dropdown">
+    <button class="btn btn-sm btn-icon" type="button" data-bs-toggle="dropdown" aria-label="Choose theme" title="Theme">
+        <i class="bi bi-palette fs-6"></i>
+    </button>
+    <ul class="dropdown-menu dropdown-menu-end">
+        <li>
+            <button type="button" class="dropdown-item @(string.IsNullOrEmpty(activeKey) ? "active" : null)"
+                    data-theme-key="" data-is-dark="false">Default</button>
+        </li>
+        @foreach (var theme in Model)
+        {
+            <li>
+                <button type="button" class="dropdown-item @(theme.Key == activeKey ? "active" : null)"
+                        data-theme-key="@theme.Key" data-is-dark="@(theme.IsDark ? "true" : "false")">
+                    <i class="bi @(theme.IsDark ? "bi-moon-stars" : "bi-circle-half") me-2"></i>@theme.Name
+                </button>
+            </li>
+        }
+    </ul>
+</div>

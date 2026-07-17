@@ -1,0 +1,21 @@
+@model CMS.Web.Models.Account.EnableAuthenticatorViewModel
+@{ ViewData["Title"] = "Recovery codes"; }
+
+<div class="row justify-content-center">
+  <div class="col-md-7 mt-4">
+    <h1 class="h4 mb-3">Recovery codes</h1>
+    <div class="alert alert-warning small"><i class="bi bi-exclamation-triangle me-1"></i>Save these codes somewhere safe. Each can be used once if you lose your authenticator. They are shown only now.</div>
+
+    <div class="card shadow-sm">
+      <div class="card-body">
+        <div class="row row-cols-2 g-2 font-monospace">
+          @foreach (var code in Model.RecoveryCodes)
+          {
+            <div class="col"><span class="badge text-bg-light border w-100 py-2">@code</span></div>
+          }
+        </div>
+      </div>
+    </div>
+    <a asp-action="Security" class="btn btn-primary btn-sm mt-3">Done</a>
+  </div>
+</div>

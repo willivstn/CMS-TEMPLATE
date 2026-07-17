@@ -95,3 +95,6 @@ RecurringJob.AddOrUpdate<EmailQueueProcessor>("email-queue", j => j.ProcessAsync
 RecurringJob.AddOrUpdate<CleanupJob>("cleanup", j => j.RunAsync(), Cron.Daily);
 
 app.Run();
+
+/// <summary>Exposed so the integration test host (WebApplicationFactory) can reference the entry point.</summary>
+public partial class Program;

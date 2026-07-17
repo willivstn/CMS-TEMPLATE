@@ -55,6 +55,7 @@ public static class DbSeeder
 
         await EnsureChildAsync("Notifications", "bi-broadcast", "Notifications", 7, Permissions.Notifications.Send);
         await EnsureChildAsync("API Keys", "bi-key", "ApiKeys", 8, Permissions.System.ManageApiKeys);
+        await EnsureChildAsync("Themes", "bi-palette", "Themes", 9, Permissions.Settings.View);
 
         // Top-level entry for the sample Announcements module.
         if (!await db.MenuItems.AnyAsync(m => m.Controller == "Announcements" && m.Area == "Admin", ct))
@@ -377,6 +378,7 @@ public static class DbSeeder
         Child(system, "Localization", "bi-translate", "Localization", "Index", 6, Permissions.Localization.View);
         Child(system, "Notifications", "bi-broadcast", "Notifications", "Index", 7, Permissions.Notifications.Send);
         Child(system, "API Keys", "bi-key", "ApiKeys", "Index", 8, Permissions.System.ManageApiKeys);
+        Child(system, "Themes", "bi-palette", "Themes", "Index", 9, Permissions.Settings.View);
 
         MenuItem Menu(string title, string icon, string? controller, string? action, int order, string permission)
         {

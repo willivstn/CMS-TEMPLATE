@@ -1,7 +1,11 @@
+using System.Security.Claims;
 using CMS.Application.Identity;
+using CMS.Domain.Common;
+using CMS.Domain.Entities.Identity;
 using CMS.Shared.Results;
 using CMS.Web.Models.Account;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using IAppAuthenticationService = CMS.Application.Identity.IAuthenticationService;
 
@@ -10,14 +14,21 @@ namespace CMS.Web.Controllers;
 /// <summary>
 /// Handles interactive authentication. Actions stay thin: they bind input,
 /// delegate to <see cref="IAppAuthenticationService"/>, and translate the
-/// <see cref="Result"/> into a redirect or a re-rendered view.
+/// <see cref="Result"/> into a redirect or a re-rendered view. External-provider
+/// sign-in uses <see cref="SignInManager{TUser}"/> directly.
 /// </summary>
 [AllowAnonymous]
-public sealed class AccountController(IAppAuthenticationService auth) : Controller
+public sealed class AccountController(
+    IAppAuthenticationService auth,
+    SignInManager<ApplicationUser> signInManager,
+    UserManager<ApplicationUser> userManager) : Controller
 {
     [HttpGet]
-    public IActionResult Login(string? returnUrl = null)
-        => View(new LoginViewModel { ReturnUrl = returnUrl });
+    public async Task<IActionResult> Login(string? returnUrl = null)
+    {
+        ViewBag.ExternalLogins = (await signInManager.GetExternalAuthenticationSchemesAsync()).ToList();
+        return View(new LoginViewModel { ReturnUrl = returnUrl });
+    }
 
     [HttpPost]
     [ValidateAntiForgeryToken]
@@ -178,6 +189,69 @@ public sealed class AccountController(IAppAuthenticationService auth) : Controll
 
     [HttpGet]
     public IActionResult AccessDenied() => View();
+
+    // ---- external login ----
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public IActionResult ExternalLogin(string provider, string? returnUrl = null)
+    {
+        var redirectUrl = Url.Action(nameof(ExternalLoginCallback), "Account", new { returnUrl });
+        var properties = signInManager.ConfigureExternalAuthenticationProperties(provider, redirectUrl);
+        return Challenge(properties, provider);
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> ExternalLoginCallback(string? returnUrl = null, string? remoteError = null)
+    {
+        if (remoteError is not null)
+        {
+            TempData["flash:error"] = $"External provider error: {remoteError}";
+            return RedirectToAction(nameof(Login));
+        }
+
+        var info = await signInManager.GetExternalLoginInfoAsync();
+        if (info is null)
+        {
+            return RedirectToAction(nameof(Login));
+        }
+
+        // Existing external login → sign in.
+        var result = await signInManager.ExternalLoginSignInAsync(info.LoginProvider, info.ProviderKey, isPersistent: false, bypassTwoFactor: true);
+        if (result.Succeeded)
+        {
+            return RedirectToLocal(returnUrl);
+        }
+
+        // First time with this provider → provision an account keyed by email.
+        var email = info.Principal.FindFirstValue(ClaimTypes.Email);
+        if (string.IsNullOrEmpty(email))
+        {
+            TempData["flash:error"] = "The external provider did not supply an email address.";
+            return RedirectToAction(nameof(Login));
+        }
+
+        var user = await userManager.FindByEmailAsync(email);
+        if (user is null)
+        {
+            user = new ApplicationUser
+            {
+                Id = Guid.NewGuid(),
+                UserName = email,
+                Email = email,
+                EmailConfirmed = true,
+                IsActive = true,
+                FirstName = info.Principal.FindFirstValue(ClaimTypes.GivenName),
+                LastName = info.Principal.FindFirstValue(ClaimTypes.Surname),
+            };
+            await userManager.CreateAsync(user);
+            await userManager.AddToRoleAsync(user, DomainDefaults.ViewerRole);
+        }
+
+        await userManager.AddLoginAsync(user, info);
+        await signInManager.SignInAsync(user, isPersistent: false);
+        return RedirectToLocal(returnUrl);
+    }
 
     // ---- helpers ----
 

@@ -83,3 +83,21 @@ public sealed class ResendConfirmationViewModel
     [Required, EmailAddress]
     public string Email { get; set; } = string.Empty;
 }
+
+/// <summary>Enable-authenticator (2FA setup) form.</summary>
+public sealed class EnableAuthenticatorViewModel
+{
+    [Required]
+    [StringLength(8, MinimumLength = 6)]
+    [Display(Name = "Verification code")]
+    public string Code { get; set; } = string.Empty;
+
+    /// <summary>The manual-entry key shown to the user.</summary>
+    public string SharedKey { get; set; } = string.Empty;
+
+    /// <summary>The otpauth:// URI for QR-code apps.</summary>
+    public string AuthenticatorUri { get; set; } = string.Empty;
+
+    /// <summary>Recovery codes shown once after enabling.</summary>
+    public string[] RecoveryCodes { get; set; } = [];
+}

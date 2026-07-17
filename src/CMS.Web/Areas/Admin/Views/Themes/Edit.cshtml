@@ -1,0 +1,42 @@
+@model ThemeFormViewModel
+@{ ViewData["Title"] = "Edit theme"; }
+
+<div class="d-flex align-items-center justify-content-between mb-3">
+    <h1 class="h3 mb-0">Edit theme</h1>
+    <a asp-action="Index" class="btn btn-sm btn-outline-secondary">Back</a>
+</div>
+
+<div class="card border-0 shadow-sm">
+    <div class="card-body" style="max-width: 640px;">
+        <form asp-action="Edit" method="post" class="row g-3">
+            <input type="hidden" asp-for="Id" />
+            <input type="hidden" asp-for="Key" />
+            <div asp-validation-summary="ModelOnly" class="text-danger small"></div>
+            <div class="col-md-6">
+                <label class="form-label">Key</label>
+                <input class="form-control" value="@Model.Key" disabled />
+            </div>
+            <div class="col-md-6">
+                <label asp-for="Name" class="form-label"></label>
+                <input asp-for="Name" class="form-control" />
+                <span asp-validation-for="Name" class="text-danger small"></span>
+            </div>
+            <div class="col-md-6">
+                <label asp-for="SortOrder" class="form-label"></label>
+                <input asp-for="SortOrder" class="form-control" />
+            </div>
+            <div class="col-md-6 d-flex align-items-end gap-3">
+                <div class="form-check form-switch"><input asp-for="IsDark" class="form-check-input" role="switch" /><label asp-for="IsDark" class="form-check-label"></label></div>
+                <div class="form-check form-switch"><input asp-for="IsEnabled" class="form-check-input" role="switch" /><label asp-for="IsEnabled" class="form-check-label"></label></div>
+            </div>
+            <div class="col-12">
+                <label asp-for="Variables" class="form-label"></label>
+                <textarea asp-for="Variables" class="form-control font-monospace" rows="6"></textarea>
+                <div class="form-text">A JSON map of Bootstrap CSS variable overrides, e.g. <code>{"--bs-primary":"#0aa"}</code>.</div>
+            </div>
+            <div class="col-12"><button type="submit" class="btn btn-primary">Save theme</button></div>
+        </form>
+    </div>
+</div>
+
+@section Scripts { <partial name="_ValidationScriptsPartial" /> }

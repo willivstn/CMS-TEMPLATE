@@ -17,12 +17,30 @@
         apply(stored);
     }
 
+    function setCookie(name, value, maxAge) {
+        document.cookie = name + '=' + value + ';path=/;max-age=' + maxAge + ';samesite=lax';
+    }
+
     document.addEventListener('DOMContentLoaded', function () {
         const toggle = document.getElementById('cmsThemeToggle');
-        if (!toggle) return;
-        toggle.addEventListener('click', function () {
-            const next = root.getAttribute('data-bs-theme') === 'dark' ? 'light' : 'dark';
-            apply(next);
+        if (toggle) {
+            toggle.addEventListener('click', function () {
+                const next = root.getAttribute('data-bs-theme') === 'dark' ? 'light' : 'dark';
+                apply(next);
+            });
+        }
+
+        // Custom theme picker: set the theme key + base mode, then reload so the
+        // server injects the theme's CSS variables.
+        document.querySelectorAll('[data-theme-key]').forEach(function (btn) {
+            btn.addEventListener('click', function () {
+                const key = btn.getAttribute('data-theme-key');
+                const isDark = btn.getAttribute('data-is-dark') === 'true';
+                setCookie(KEY, isDark ? 'dark' : 'light', 31536000);
+                localStorage.setItem(KEY, isDark ? 'dark' : 'light');
+                setCookie('cms-theme-key', key || '', key ? 31536000 : 0);
+                window.location.reload();
+            });
         });
     });
 })();

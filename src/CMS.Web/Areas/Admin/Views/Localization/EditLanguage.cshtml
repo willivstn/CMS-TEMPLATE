@@ -1,0 +1,41 @@
+@model LanguageFormViewModel
+@{ ViewData["Title"] = "Edit language"; }
+
+<div class="d-flex align-items-center justify-content-between mb-3">
+    <h1 class="h3 mb-0">Edit language</h1>
+    <a asp-action="Index" class="btn btn-sm btn-outline-secondary">Back</a>
+</div>
+
+<div class="card border-0 shadow-sm">
+    <div class="card-body" style="max-width: 520px;">
+        <form asp-action="EditLanguage" method="post" class="row g-3">
+            <input type="hidden" asp-for="Id" />
+            <input type="hidden" asp-for="Code" />
+            <div asp-validation-summary="ModelOnly" class="text-danger small"></div>
+            <div class="col-md-6">
+                <label class="form-label">Code</label>
+                <input class="form-control" value="@Model.Code" disabled />
+            </div>
+            <div class="col-md-6">
+                <label asp-for="SortOrder" class="form-label"></label>
+                <input asp-for="SortOrder" class="form-control" />
+            </div>
+            <div class="col-md-6">
+                <label asp-for="Name" class="form-label"></label>
+                <input asp-for="Name" class="form-control" />
+                <span asp-validation-for="Name" class="text-danger small"></span>
+            </div>
+            <div class="col-md-6">
+                <label asp-for="NativeName" class="form-label"></label>
+                <input asp-for="NativeName" class="form-control" />
+            </div>
+            <div class="col-12">
+                <div class="form-check form-switch"><input asp-for="IsRtl" class="form-check-input" role="switch" /><label asp-for="IsRtl" class="form-check-label"></label></div>
+                <div class="form-check form-switch"><input asp-for="IsEnabled" class="form-check-input" role="switch" /><label asp-for="IsEnabled" class="form-check-label"></label></div>
+            </div>
+            <div class="col-12"><button type="submit" class="btn btn-primary">Save</button></div>
+        </form>
+    </div>
+</div>
+
+@section Scripts { <partial name="_ValidationScriptsPartial" /> }

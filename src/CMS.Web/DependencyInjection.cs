@@ -132,7 +132,7 @@ public static class DependencyInjection
         services.Configure<JwtOptions>(configuration.GetSection(JwtOptions.SectionName));
         services.AddScoped<ITokenService, JwtTokenService>();
 
-        services.AddAuthentication()
+        var authBuilder = services.AddAuthentication()
             .AddJwtBearer(options =>
             {
                 options.TokenValidationParameters = new TokenValidationParameters
@@ -148,6 +148,29 @@ public static class DependencyInjection
                 };
             })
             .AddScheme<ApiKeyAuthenticationOptions, ApiKeyAuthenticationHandler>(ApiKeyAuthenticationHandler.SchemeName, null);
+
+        // External identity providers light up only when configured. Add
+        // "Authentication:Google" / "Authentication:Microsoft" ClientId+ClientSecret
+        // to enable the buttons on the sign-in page.
+        var google = configuration.GetSection("Authentication:Google");
+        if (!string.IsNullOrWhiteSpace(google["ClientId"]))
+        {
+            authBuilder.AddGoogle(options =>
+            {
+                options.ClientId = google["ClientId"]!;
+                options.ClientSecret = google["ClientSecret"] ?? string.Empty;
+            });
+        }
+
+        var microsoft = configuration.GetSection("Authentication:Microsoft");
+        if (!string.IsNullOrWhiteSpace(microsoft["ClientId"]))
+        {
+            authBuilder.AddMicrosoftAccount(options =>
+            {
+                options.ClientId = microsoft["ClientId"]!;
+                options.ClientSecret = microsoft["ClientSecret"] ?? string.Empty;
+            });
+        }
 
         services.AddApiVersioning(options =>
             {

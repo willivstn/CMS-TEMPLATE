@@ -1,0 +1,41 @@
+@model IReadOnlyList<ThemeDto>
+@{ ViewData["Title"] = "Themes"; }
+
+<div class="d-flex align-items-center justify-content-between mb-3">
+    <div>
+        <h1 class="h3 mb-0">Themes</h1>
+        <span class="text-secondary small">Custom themes override Bootstrap CSS variables. Pick one from the palette menu in the top bar.</span>
+    </div>
+    <a asp-action="Create" class="btn btn-primary btn-sm"><i class="bi bi-plus-lg me-1"></i>New theme</a>
+</div>
+
+<div class="card border-0 shadow-sm">
+    <div class="card-body">
+        <table class="table table-hover align-middle mb-0">
+            <thead><tr class="text-secondary small"><th>Theme</th><th>Key</th><th>Base</th><th>Status</th><th class="text-end">Actions</th></tr></thead>
+            <tbody>
+            @foreach (var t in Model)
+            {
+                <tr>
+                    <td class="fw-medium">@t.Name</td>
+                    <td><code class="small">@t.Key</code></td>
+                    <td>@(t.IsDark ? "Dark" : "Light")</td>
+                    <td>
+                        @if (t.IsDefault) { <span class="badge text-bg-primary">default</span> }
+                        @if (!t.IsEnabled) { <span class="badge text-bg-secondary">disabled</span> } else { <span class="badge text-bg-success">enabled</span> }
+                    </td>
+                    <td class="text-end">
+                        <a asp-action="Edit" asp-route-id="@t.Id" class="btn btn-sm btn-outline-secondary">Edit</a>
+                        @if (!t.IsDefault)
+                        {
+                            <form asp-action="Delete" asp-route-id="@t.Id" method="post" class="d-inline">
+                                <button class="btn btn-sm btn-outline-danger" data-cms-confirm="Delete '@t.Name'?">Delete</button>
+                            </form>
+                        }
+                    </td>
+                </tr>
+            }
+            </tbody>
+        </table>
+    </div>
+</div>
