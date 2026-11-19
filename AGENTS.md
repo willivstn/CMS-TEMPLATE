@@ -2,7 +2,7 @@
 
 A reusable .NET 10 CMS template (Clean Architecture). BaseCamp was derived from it, and the two have since diverged, so a
 change here does not reach BaseCamp. It is not deployed anywhere. The workspace rules in `C:\HIGHVELDLABS\AGENTS.md` come
-first: Notion project "HighveldLabs Site & CMS", AI-Memory ID `cms-template`. Details live in [README.md](README.md) and
+first: Workspace project "HighveldLabs Site & CMS", AI-Memory ID `cms-template`. Details live in [README.md](README.md) and
 [docs/](docs/).
 
 ## Layout
